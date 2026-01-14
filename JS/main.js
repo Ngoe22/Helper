@@ -1,55 +1,39 @@
-const serverURL = `https://6963c4b02d146d9f58d45a80.mockapi.io/test/users`;
+// project-list-btn
 
-// -------------------- GET --------------------
+// project-list
+// project-item add
 
-async function getFromServer(id = ``) {
-    if (typeof id !== `string`) return `invalid type`;
-    try {
-        const response = await fetch(`${serverURL}/${id}`);
-        const data = await response.json();
-        console.log(data);
-    } catch (error) {
-        console.error(`Post error : `, error);
-        return null;
-    }
-}
+// project-pinList
 
+// tools
 
-// -------------------- POST --------------------
+// section-list
+// section-item add
 
-async function postToServer(data) {
-    try {
-        const response = await fetch(serverURL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-        });
-        const newPost = await response.json();
-        console.log("Posted:", newPost);
-    } catch (error) {
-        console.error(`Post error : `, error);
-    }
-}
+// section-content
 
-// -------------------- UPDATE --------------------
+const yewu1 = {
+    name: "yewu",
+    page: [
+        {
+            name: "page-1",
+            content: [
+                {
+                    type: "listToDo",
+                    index: "1",
+                    else: "...",
+                },
+                {
+                    type: "procedure",
+                    index: "2",
+                    else: "...",
+                },
+            ],
+        },
+        {
+            name: "page-2",
+        },
+    ],
+};
 
-async function updateToServer(id, data) {
-    if (typeof id !== `string`) return `invalid type`;
-    try {
-        const response = await fetch(`${serverURL}/${id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-        });
-        const updatedPost = await response.json();
-        console.log("Posted:", updatedPost);
-    } catch (error) {
-        console.error(`Post error : `, error);
-    }
-}
-
-// updateToServer() 
+// list [ yewu1 , yewu2 ]
