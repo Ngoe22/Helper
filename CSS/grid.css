@@ -1,0 +1,186 @@
+/* =========================================
+   1. CORE SETUP
+   ========================================= */
+* {
+    box-sizing: border-box;
+}
+
+/* Biến số cho khoảng cách giữa các cột (Gutter) */
+:root {
+    --gutter-x: 15px;
+}
+
+/* =========================================
+   2. CONTAINER (Hộp chứa thông minh)
+   ========================================= */
+.container {
+    width: 100%;
+    padding-right: var(--gutter-x);
+    padding-left: var(--gutter-x);
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/* Responsive Breakpoints cho Container */
+/* Màn hình nhỏ (sm) */
+@media (min-width: 576px) {
+    .container {
+        max-width: 540px;
+    }
+}
+/* Máy tính bảng (md) */
+@media (min-width: 768px) {
+    .container {
+        max-width: 720px;
+    }
+}
+/* Màn hình Desktop (lg) */
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+    }
+}
+/* Màn hình lớn (xl) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* =========================================
+   3. GRID SYSTEM (Row & Cols)
+   ========================================= */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    /* Kéo margin âm để cân bằng padding của column */
+    margin-left: calc(var(--gutter-x) * -1);
+    margin-right: calc(var(--gutter-x) * -1);
+}
+
+/* Thuộc tính chung cho tất cả các cột */
+[class*="col-"] {
+    position: relative;
+    width: 100%; /* Mặc định mobile là 100% */
+    padding-right: var(--gutter-x);
+    padding-left: var(--gutter-x);
+}
+
+/* --- MOBILE FIRST (Mặc định cho điện thoại) --- */
+/* Class: .col-1 -> .col-12 */
+.col-1 {
+    width: 8.3333%;
+}
+.col-2 {
+    width: 16.6666%;
+}
+.col-3 {
+    width: 25%;
+}
+.col-4 {
+    width: 33.3333%;
+}
+.col-5 {
+    width: 41.6666%;
+}
+.col-6 {
+    width: 50%;
+}
+.col-7 {
+    width: 58.3333%;
+}
+.col-8 {
+    width: 66.6666%;
+}
+.col-9 {
+    width: 75%;
+}
+.col-10 {
+    width: 83.3333%;
+}
+.col-11 {
+    width: 91.6666%;
+}
+.col-12 {
+    width: 100%;
+}
+
+/* --- TABLET (Medium - md) >= 768px --- */
+@media (min-width: 768px) {
+    .col-md-1 {
+        width: 8.3333%;
+    }
+    .col-md-2 {
+        width: 16.6666%;
+    }
+    .col-md-3 {
+        width: 25%;
+    }
+    .col-md-4 {
+        width: 33.3333%;
+    }
+    .col-md-5 {
+        width: 41.6666%;
+    }
+    .col-md-6 {
+        width: 50%;
+    }
+    .col-md-7 {
+        width: 58.3333%;
+    }
+    .col-md-8 {
+        width: 66.6666%;
+    }
+    .col-md-9 {
+        width: 75%;
+    }
+    .col-md-10 {
+        width: 83.3333%;
+    }
+    .col-md-11 {
+        width: 91.6666%;
+    }
+    .col-md-12 {
+        width: 100%;
+    }
+}
+
+/* --- DESKTOP (Large - lg) >= 992px --- */
+@media (min-width: 992px) {
+    .col-lg-1 {
+        width: 8.3333%;
+    }
+    .col-lg-2 {
+        width: 16.6666%;
+    }
+    .col-lg-3 {
+        width: 25%;
+    }
+    .col-lg-4 {
+        width: 33.3333%;
+    }
+    .col-lg-5 {
+        width: 41.6666%;
+    }
+    .col-lg-6 {
+        width: 50%;
+    }
+    .col-lg-7 {
+        width: 58.3333%;
+    }
+    .col-lg-8 {
+        width: 66.6666%;
+    }
+    .col-lg-9 {
+        width: 75%;
+    }
+    .col-lg-10 {
+        width: 83.3333%;
+    }
+    .col-lg-11 {
+        width: 91.6666%;
+    }
+    .col-lg-12 {
+        width: 100%;
+    }
+}
