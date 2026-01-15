@@ -132,6 +132,7 @@ table {
 
 body {
     font-family: "Noto Sans SC", sans-serif;
+    min-height: 100vh;
 }
 
 .hide {
@@ -172,12 +173,21 @@ body {
     justify-content: right;
 }
 
-.section-item {
+.section-item,
+.section-item-add {
     padding: 5px 5px 8px;
 }
 
 .section-content {
     padding: 5px;
+}
+
+.project-item,
+.project-item-add,
+.section-item,
+.section-item-add,
+.project-pinItem {
+    cursor: pointer;
 }
 
 /* ----------------------------  each ---------------------------- */
@@ -187,10 +197,21 @@ body {
 }
 
 .project-list {
+    min-width: 100px;
     position: absolute;
-    background: white;
     top: 20px;
     left: -15px;
-    min-width: 100px;
+    background: white;
 }
 
+/* 
+//  projectListBtn =   (`.project-list-btn`);
+//  projectList =   (`.project-list`);
+//  projectListWrap =   (`.project-list-wrap`);
+//  projectAddItem =   (`.project-item.add`);
+//  projectPinList =   (`.project-pinList`);
+//  tools =   (`.tools`);
+//  sectionList =   (`.section-list`);
+//  sectionAddItem =   (`.section-item.add`);
+//  sectionContent =   (`.section-content`); 
+*/

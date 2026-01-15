@@ -14,6 +14,7 @@
 
 const projectListBtn = document.querySelector(`.project-list-btn`);
 const projectList = document.querySelector(`.project-list`);
+const projectListWrap = document.querySelector(`.project-list-wrap`);
 const projectAddItem = document.querySelector(`.project-item.add`);
 const projectPinList = document.querySelector(`.project-pinList`);
 const tools = document.querySelector(`.tools`);
@@ -21,35 +22,130 @@ const sectionList = document.querySelector(`.section-list`);
 const sectionAddItem = document.querySelector(`.section-item.add`);
 const sectionContent = document.querySelector(`.section-content`);
 
-const yewu1 = {
-    name: "yewu",
-    page: [
-        {
-            name: "page-1",
-            index: "1",
-            content: [
-                {
-                    type: "listToDo",
-                    index: "1",
-                    else: "...",
-                },
-                {
-                    type: "procedure",
-                    index: "2",
-                    else: "...",
-                },
-            ],
-        },
-        {
-            name: "page-2",
-            index: "2",
-            content: [
-                {
-                    // meow
-                },
-            ],
-        },
-    ],
+const testingList = [
+    {
+        name: "yewu1",
+        pagesName: ["page-1.1", "page-1.2"],
+        page: [
+            {
+                name: "page-1.1",
+                index: "1",
+                content: [
+                    {
+                        type: "listToDo",
+                        index: "1",
+                        else: "...",
+                        html: "html-1.1",
+                    },
+                    {
+                        type: "procedure",
+                        index: "2",
+                        else: "...",
+                        html: "html-1.2",
+                    },
+                ],
+            },
+            {
+                name: "page-1.2",
+                index: "2",
+                content: [
+                    {
+                        type: "listToDo",
+                        index: "1",
+                        else: "...",
+                        html: "html-2.1",
+                    },
+                    {
+                        type: "procedure",
+                        index: "2",
+                        else: "...",
+                        html: "html-2.2",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        name: "yewu2",
+        pagesName: ["page-2.1", "page-2.2"],
+        page: [
+            {
+                name: "page-2.1",
+                index: "1",
+                content: [
+                    {
+                        type: "listToDo",
+                        index: "1",
+                        else: "...",
+                        html: "html-1.1",
+                    },
+                    {
+                        type: "procedure",
+                        index: "2",
+                        else: "...",
+                        html: "html-1.2",
+                    },
+                ],
+            },
+            {
+                name: "page-2.2",
+                index: "2",
+                content: [
+                    {
+                        type: "listToDo",
+                        index: "1",
+                        else: "...",
+                        html: "html-2.1",
+                    },
+                    {
+                        type: "procedure",
+                        index: "2",
+                        else: "...",
+                        html: "html-2.2",
+                    },
+                ],
+            },
+        ],
+    },
+];
+
+// project = testingList + forEach
+// page = testingList.page + forEach
+// content = testingList.page.content + forEach
+
+// ----------------------------  onclick ----------------------------
+
+// show list btn
+projectListWrap.onclick = (e) => {
+    e.stopPropagation();
+    const clicked = e.target;
+    if (clicked === projectListBtn) {
+        projectList.classList.toggle(`hide`);
+    }
+    if (clicked.classList.contains(`project-item`)) {
+        projectOpen(clicked.textContent);
+    }
+};
+document.body.onclick = (e) => {
+    projectList.classList.add(`hide`);
 };
 
-// list [ yewu1 , yewu2 ]
+// pin bar
+projectPinList.onclick = (e) => {
+    const eClassList = e.target.classList;
+    if (eClassList.contains(`project-pinCancel`)) {
+        projectClose(clicked);
+    }
+    if (eClassList.contains(`project-pinItem`)) {
+        projectOpen(clicked.textContent);
+    }
+};
+
+// sections
+sectionList.onclick = (e) => {
+    const eClassList = e.target.classList.contains;
+    if ( eClassList.contains(`section-item`) ){
+        contentRender()
+    }
+
+};
