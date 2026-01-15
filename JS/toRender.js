@@ -51,11 +51,14 @@ function sectionSideListRender(add = true, projectName) {
         }
     }
 }
-function sectionSideListRemoveActive() {}
+function removeActive(parentNode, childrenCLass = ``) {
+    const list = parentNode.querySelectorALL(`.childrenCLass`);
+}
 
 // ---------------------------- function onclick ----------------------------
 
-function projectOpen(projectName) {
+function projectOpen(projectNode) {
+    const projectName = projectNode.textContent;
     projectsPinAdd(projectName);
     sectionSideListRender(true, projectName);
 }

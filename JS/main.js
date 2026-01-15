@@ -137,7 +137,7 @@ projectPinList.onclick = (e) => {
         projectClose(clicked);
     }
     if (eClassList.contains(`project-pinItem`)) {
-        projectOpen(clicked.textContent);
+        projectOpen(clicked);
     }
 };
 
