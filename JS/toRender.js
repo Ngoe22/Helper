@@ -1,77 +1,219 @@
+const current = {
+    pinList: [],
+};
+
+// ----------------------------  init ----------------------------
+
 function initRender() {
-    console.log(testingList);
     testingList.forEach((value) => {
         projectList.insertAdjacentHTML(
             `beforeend`,
-            `<li class="project-item">${value.name}</li>`
+            `<li class="project-item">${value.name}</li>`,
         );
     });
 }
 initRender();
 
-//  ---------------------------- render ----------------------------
+// ----------------------------  onclick ----------------------------
 
-const currentPin = [];
-let currentProject = null;
+// show list btn
+projectListWrap.onclick = (e) => {
+    e.stopPropagation();
+    const clicked = e.target;
+    if (clicked === projectListBtn) {
+        projectList.classList.toggle(`hide`);
+    }
+    if (clicked.classList.contains(`project-item`)) {
+        // projectOpen(clicked);
 
-function projectsPinAdd(projectName) {
-    if (currentPin.includes(projectName)) return;
-    projectPinList.insertAdjacentHTML(
-        "beforeend",
-        `<li class="project-pinItem">${projectName}<button class="project-pinCancel"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button></li>`
+        pinClickHandle(clicked, true);
+    }
+};
+document.body.onclick = (e) => {
+    projectList.classList.add(`hide`);
+};
+
+// pin bar
+projectPinList.onclick = (e) => {
+    const eClassList = e.target.classList;
+    if (eClassList.contains(`project-pinCancel`)) {
+        sideListCLose(e.target);
+    }
+    if (eClassList.contains(`project-pinItem`)) {
+        pinClickHandle(e.target);
+    }
+};
+
+// sections
+sectionList.onclick = (e) => {
+    const eClassList = e.target.classList;
+    if (eClassList.contains(`section-item`)) {
+        sideListActive(e.target);
+    }
+};
+
+// ---------------------------- minor function  ----------------------------
+
+function clearActive(parent, childrenClass) {
+    const findActive = parent.querySelector(childrenClass);
+    if (findActive) findActive.classList.remove(`active`);
+}
+
+function makeANode(input) {
+    option = Object.assign(
+        {
+            tagName: `div`,
+            class: ``,
+            innerHtml: ``,
+        },
+        input,
     );
-    currentPin.push(projectName);
-}
-function projectsPinDelete(projectName) {
-    currentPin.splice(currentPin.indexOf(projectName), 1);
-    const l = currentPin.length;
-    if (l > 0) {
-        sectionSideListRender(true, currentPin[l - 1]);
-    } else {
-        sectionSideListRender(false);
-    }
+
+    const newNode = document.createElement(option.tagName);
+    newNode.className = option.class;
+    newNode.innerHTML = option.innerHtml;
+
+    return newNode;
 }
 
-function sectionSideListRender(add = true, projectName) {
-    //  handle remove
-    if (add === false)
-        return (sectionList.innerHTML = `<li class="section-item-add">add</li>`);
+// dataQuery(testingList, [
+//     {
+//         key: `name`,
+//         value: `yewu2`,
+//         objPath: [`page`],
+//     },
+//     {
+//         key: `name`,
+//         value: `page-2.2`,
+//         objPath: [`content`],
+//     },
+// ]);
+function dataQuery(root, paths) {
+    let currentI = 0;
+    let pathI = 0;
+    const pathL = paths.length;
+    let current = root;
+    let currentL = current.length;
 
-    //  handle add
-    if (typeof projectName !== "string") return console.log(`invalid param`);
-    for (let i of testingList) {
-        if (i.name === projectName) {
-            const pagesList = i.pagesName;
-            let html = `<li class="section-item-add">add</li>`;
-            pagesList.forEach((value) => {
-                html += `<li class="section-item">${value}</li>`;
-            });
-            sectionList.innerHTML = html;
-            return;
+    while (1) {
+        if (current[currentI][paths[pathI].key] === paths[pathI].value) {
+            current = current[currentI];
+            const temp = paths[pathI].objPath;
+            for (i of temp) {
+                current = current[i];
+            }
+            currentL = current.length;
+            currentI = -1;
+            pathI++;
         }
+        currentI++;
+        if (currentI >= currentL || pathI >= pathL) break;
     }
+    // console.log(current);
+    return current;
 }
-function removeActive(parentNode, childrenCLass = ``) {
-    const list = parentNode.querySelectorALL(`.childrenCLass`);
+
+function querySelectorByText(selector, text) {
+    const elements = document.querySelectorAll(selector);
+    return Array.from(elements).find((element) => {
+        return element.textContent.trim().includes(text);
+    });
 }
 
 // ---------------------------- function onclick ----------------------------
+const currentPin = new Set();
+const currentActive = {
+    pin: ``,
+    section: ``,
+};
+// add init set from sever
 
-function projectOpen(projectNode) {
-    const projectName = projectNode.textContent;
-    projectsPinAdd(projectName);
-    sectionSideListRender(true, projectName);
+function pinClickHandle(clicked, add = false) {
+    projectName = clicked.textContent;
+
+    if (add) {
+        if (currentPin.has(projectName)) {
+            //
+        } else {
+            currentPin.add(projectName);
+        }
+    }
+    pinRender(projectName);
 }
 
-function projectClose(projectNode) {
-    let parent = projectNode.closest(`.project-pinItem`);
-    projectsPinDelete(parent.textContent);
-    parent.remove();
-    parent = null;
+function pinRender(projectName) {
+    // check is Active
+    if (currentActive.pin === projectName) return;
+
+    // update currentActive.pin
+    currentActive.pin = projectName;
+
+    //  render
+    const list = Array.from(currentPin);
+    projectPinList.innerHTML = ``;
+    for (let i of list) {
+        projectPinList.insertAdjacentHTML(
+            `beforeend`,
+            i === projectName
+                ? `<li class="project-pinItem active">${i}</li>`
+                : `<li class="project-pinItem">${i}</li>`,
+        );
+    }
+    sideListRender(projectName);
 }
 
-function sectionOpen() {}
+function sideListRender() {
+    const data = dataQuery(testingList, [
+        {
+            key: `name`,
+            value: `${currentActive.pin}`,
+            objPath: [`page`],
+        },
+    ]);
+    //
+    let html = `<li class="section-item-add">add</li>`;
+    for (let i of data) {
+        html += `<li class="section-item">${i.name}</li>`;
+    }
+    sectionList.innerHTML = html;
+}
 
-// <li class="project-pinItem">
-//     project 1 <button>X</button>
-// </li>
+function sideListActive(sectionNode) {
+    const sectionName = sectionNode.textContent;
+
+    if (!sectionNode.classList.contains(`active`)) {
+        clearActive(sectionList, `.section-item.active`);
+        currentActive.section = sectionName;
+        sectionNode.classList.add(`active`);
+        contentRender();
+    }
+}
+
+function contentRender() {
+    const data = dataQuery(testingList, [
+        {
+            key: `name`,
+            value: `${currentActive.pin}`,
+            objPath: [`page`],
+        },
+        {
+            key: `name`,
+            value: `${currentActive.section}`,
+            objPath: [`content`],
+        },
+    ]);
+
+    console.log(data);
+
+    sectionContent.innerHTML = ``;
+    for (let i of data) {
+        console.log(i);
+
+        sectionContent.insertAdjacentHTML(
+            `beforeend`,
+            `<li class="section-content-card">${i.type}</li>`,
+        );
+    }
+}
+
+//  ---------------------------- render ----------------------------

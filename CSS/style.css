@@ -204,6 +204,10 @@ body {
     background: white;
 }
 
+.active {
+    background-color: red;
+}
+
 /* 
 //  projectListBtn =   (`.project-list-btn`);
 //  projectList =   (`.project-list`);
@@ -214,4 +218,11 @@ body {
 //  sectionList =   (`.section-list`);
 //  sectionAddItem =   (`.section-item.add`);
 //  sectionContent =   (`.section-content`); 
+*/
+
+/* 
+const currentActive = {
+    pin: ``,
+    section: ``,
+};
 */
