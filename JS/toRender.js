@@ -182,7 +182,9 @@ function pinRender(projectName) {
     }
 }
 
-function sideListRender() {
+function sideListRender(reset = false) {
+    if (reset) sectionList.innerHTML = ``;
+
     const data = dataQuery(testingList, [
         {
             key: `name`,
