@@ -24,8 +24,6 @@ projectListWrap.onclick = (e) => {
         projectList.classList.toggle(`hide`);
     }
     if (clicked.classList.contains(`project-item`)) {
-        // projectOpen(clicked);
-
         pinClickHandle({
             node: clicked,
             addPin: true,
@@ -43,7 +41,6 @@ projectPinList.onclick = (e) => {
     const eClassList = e.target.classList;
     if (eClassList.contains(`project-pinCancel`)) {
         unpinClickHandle(e.target);
-        console.log(`meow`);
     }
     if (eClassList.contains(`project-pinItem`)) {
         pinClickHandle({
@@ -190,12 +187,7 @@ function pinRender() {
 }
 
 function sideListRender(reset = false) {
-    console.log(reset);
-
     if (reset) return (sectionList.innerHTML = `no project opened`);
-
-    console.log(sectionList);
-
     const data = dataQuery(testingList, [
         {
             key: `name`,
