@@ -39,9 +39,11 @@ document.body.onclick = (e) => {
 
 // pin bar
 projectPinList.onclick = (e) => {
+    e.stopPropagation();
     const eClassList = e.target.classList;
     if (eClassList.contains(`project-pinCancel`)) {
-        sideListCLose(e.target);
+        unpinClickHandle(e.target);
+        console.log(`meow`);
     }
     if (eClassList.contains(`project-pinItem`)) {
         pinClickHandle({
@@ -147,7 +149,6 @@ function pinClickHandle(input) {
     );
 
     const { node, addPin, contentReset } = options;
-
     projectName = node.textContent;
 
     if (addPin) {
@@ -157,17 +158,23 @@ function pinClickHandle(input) {
             currentPin.add(projectName);
         }
     }
-    pinRender(projectName);
-    sideListRender();
-    contentRender(contentReset);
-}
 
-function pinRender(projectName) {
     // check is Active
     if (currentActive.pin === projectName) return;
 
     // update currentActive.pin
     currentActive.pin = projectName.trim();
+
+    pinRender();
+    sideListRender();
+    contentRender(contentReset);
+}
+
+function pinRender() {
+    if (currentPin.size === 0)
+        return (projectPinList.innerHTML = `no open project `);
+
+    const projectName = currentActive.pin;
 
     //  render
     const list = Array.from(currentPin);
@@ -176,14 +183,18 @@ function pinRender(projectName) {
         projectPinList.insertAdjacentHTML(
             `beforeend`,
             i === projectName
-                ? `<li class="project-pinItem active">${i}<button></button></li>`
-                : `<li class="project-pinItem">${i}<button></button></li>`,
+                ? `<li class="project-pinItem active">${i}<button class="project-pinCancel" ></button></li>`
+                : `<li class="project-pinItem">${i}<button class="project-pinCancel" ></button></li>`,
         );
     }
 }
 
 function sideListRender(reset = false) {
-    if (reset) sectionList.innerHTML = ``;
+    console.log(reset);
+
+    if (reset) return (sectionList.innerHTML = `no project opened`);
+
+    console.log(sectionList);
 
     const data = dataQuery(testingList, [
         {
@@ -215,10 +226,7 @@ function sideListActive(sectionNode) {
 }
 
 function contentRender(reset = false) {
-    console.log(reset);
-
     if (reset) return (sectionContent.innerHTML = `open a section`);
-
     const data = dataQuery(testingList, [
         {
             key: `name`,
@@ -237,6 +245,28 @@ function contentRender(reset = false) {
             `beforeend`,
             `<li class="section-content-card">${i.type} \n ${i.html}</li>`,
         );
+    }
+}
+
+function unpinClickHandle(clicked) {
+    //currentActive.pin
+
+    projectName = clicked.closest(`.project-pinItem`).textContent;
+    currentPin.delete(projectName);
+
+    if (currentPin.size === 0) {
+        currentActive.pin = null;
+        pinRender();
+        sideListRender(true);
+        contentRender(true);
+    } else {
+        if (!currentActive.pin === projectName) {
+            const lastInList = Array.from(currentPin)[currentPin.size - 1];
+            currentActive.pin = lastInList;
+            sideListRender(true);
+            contentRender(true);
+        }
+        pinRender();
     }
 }
 
