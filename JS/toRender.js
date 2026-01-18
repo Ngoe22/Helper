@@ -26,7 +26,11 @@ projectListWrap.onclick = (e) => {
     if (clicked.classList.contains(`project-item`)) {
         // projectOpen(clicked);
 
-        pinClickHandle(clicked, true);
+        pinClickHandle({
+            node: clicked,
+            addPin: true,
+            contentReset: true,
+        });
     }
 };
 document.body.onclick = (e) => {
@@ -40,7 +44,11 @@ projectPinList.onclick = (e) => {
         sideListCLose(e.target);
     }
     if (eClassList.contains(`project-pinItem`)) {
-        pinClickHandle(e.target);
+        pinClickHandle({
+            node: e.target,
+            addPin: false,
+            contentReset: true,
+        });
     }
 };
 
@@ -110,7 +118,7 @@ function dataQuery(root, paths) {
         if (currentI >= currentL || pathI >= pathL) break;
     }
     // console.log(current);
-    return current;
+    return current === root ? false : current;
 }
 
 function querySelectorByText(selector, text) {
@@ -128,10 +136,21 @@ const currentActive = {
 };
 // add init set from sever
 
-function pinClickHandle(clicked, add = false) {
-    projectName = clicked.textContent;
+function pinClickHandle(input) {
+    options = Object.assign(
+        {
+            node: null,
+            addPin: false,
+            contentReset: false,
+        },
+        input,
+    );
 
-    if (add) {
+    const { node, addPin, contentReset } = options;
+
+    projectName = node.textContent;
+
+    if (addPin) {
         if (currentPin.has(projectName)) {
             //
         } else {
@@ -139,6 +158,8 @@ function pinClickHandle(clicked, add = false) {
         }
     }
     pinRender(projectName);
+    sideListRender();
+    contentRender(contentReset);
 }
 
 function pinRender(projectName) {
@@ -146,7 +167,7 @@ function pinRender(projectName) {
     if (currentActive.pin === projectName) return;
 
     // update currentActive.pin
-    currentActive.pin = projectName;
+    currentActive.pin = projectName.trim();
 
     //  render
     const list = Array.from(currentPin);
@@ -155,11 +176,10 @@ function pinRender(projectName) {
         projectPinList.insertAdjacentHTML(
             `beforeend`,
             i === projectName
-                ? `<li class="project-pinItem active">${i}</li>`
-                : `<li class="project-pinItem">${i}</li>`,
+                ? `<li class="project-pinItem active">${i}<button></button></li>`
+                : `<li class="project-pinItem">${i}<button></button></li>`,
         );
     }
-    sideListRender(projectName);
 }
 
 function sideListRender() {
@@ -170,6 +190,9 @@ function sideListRender() {
             objPath: [`page`],
         },
     ]);
+
+    if (!data) return console.log(`no match data`);
+
     //
     let html = `<li class="section-item-add">add</li>`;
     for (let i of data) {
@@ -189,7 +212,11 @@ function sideListActive(sectionNode) {
     }
 }
 
-function contentRender() {
+function contentRender(reset = false) {
+    console.log(reset);
+
+    if (reset) return (sectionContent.innerHTML = `open a section`);
+
     const data = dataQuery(testingList, [
         {
             key: `name`,
@@ -202,16 +229,11 @@ function contentRender() {
             objPath: [`content`],
         },
     ]);
-
-    console.log(data);
-
     sectionContent.innerHTML = ``;
     for (let i of data) {
-        console.log(i);
-
         sectionContent.insertAdjacentHTML(
             `beforeend`,
-            `<li class="section-content-card">${i.type}</li>`,
+            `<li class="section-content-card">${i.type} \n ${i.html}</li>`,
         );
     }
 }
