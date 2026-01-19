@@ -197,11 +197,24 @@ body {
 }
 
 .project-list {
-    min-width: 100px;
     position: absolute;
     top: 20px;
     left: -15px;
     background: white;
+    width: max-content;
+}
+
+.project-item {
+    position: relative;
+}
+
+.getTempText {
+    position: absolute;
+    inset: 0 0 0 0;
+    display: flex;
+}
+.getTempText input {
+    width: 80%;
 }
 
 .active {
@@ -209,14 +222,16 @@ body {
 }
 
 /* 
+//  projectListWrap =   (`.project-list-wrap`);
 //  projectListBtn =   (`.project-list-btn`);
 //  projectList =   (`.project-list`);
-//  projectListWrap =   (`.project-list-wrap`);
-//  projectAddItem =   (`.project-item.add`);
-//  projectPinList =   (`.project-pinList`);
+
 //  tools =   (`.tools`);
+
+//  projectPinList =   (`.project-pinList`);
+
 //  sectionList =   (`.section-list`);
-//  sectionAddItem =   (`.section-item.add`);
+
 //  sectionContent =   (`.section-content`); 
 */
 
@@ -224,5 +239,20 @@ body {
 const currentActive = {
     pin: ``,
     section: ``,
+    pinList: [],
 };
+
+
+// dataQuery(testingList, [
+//     {
+//         key: `name`,
+//         value: `yewu2`,
+//         objPath: [`page`],
+//     },
+//     {
+//         key: `name`,
+//         value: `page-2.2`,
+//         objPath: [`content`],
+//     },
+// ]);
 */
