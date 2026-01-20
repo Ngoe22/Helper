@@ -23,9 +23,11 @@ const sectionContent = document.querySelector(`.section-content`);
 const testingList = [
     {
         name: "yewu1",
+        id: `1`,
         page: [
             {
                 name: "page-1.1",
+                id: `1`,
                 content: [
                     {
                         type: "listToDo",
@@ -41,6 +43,7 @@ const testingList = [
             },
             {
                 name: "page-1.2",
+                id: `2`,
                 content: [
                     {
                         type: "listToDo",
@@ -58,9 +61,11 @@ const testingList = [
     },
     {
         name: "yewu2",
+        id: `2`,
         page: [
             {
                 name: "page-2.1",
+                id: `1`,
                 content: [
                     {
                         type: "listToDo",
@@ -76,6 +81,7 @@ const testingList = [
             },
             {
                 name: "page-2.2",
+                id: `2`,
                 content: [
                     {
                         type: "listToDo",
@@ -93,9 +99,11 @@ const testingList = [
     },
     {
         name: "yewu3",
+        id: `3`,
         page: [
             {
                 name: "page-3.1",
+                id: `1`,
                 content: [
                     {
                         type: "listToDo",
@@ -111,6 +119,7 @@ const testingList = [
             },
             {
                 name: "page-3.2",
+                id: `2`,
                 content: [
                     {
                         type: "listToDo",

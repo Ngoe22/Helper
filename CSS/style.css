@@ -204,7 +204,8 @@ body {
     width: max-content;
 }
 
-.project-item {
+.project-item,
+.section-item {
     position: relative;
 }
 
@@ -236,9 +237,10 @@ body {
 */
 
 /* 
+
 const currentActive = {
-    pin: ``,
-    section: ``,
+    pinID: ``,
+    sectionID: ``,
     pinList: [],
 };
 
