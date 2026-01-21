@@ -223,17 +223,13 @@ body {
 }
 
 /* 
-//  projectListWrap =   (`.project-list-wrap`);
-//  projectListBtn =   (`.project-list-btn`);
-//  projectList =   (`.project-list`);
-
-//  tools =   (`.tools`);
-
-//  projectPinList =   (`.project-pinList`);
-
-//  sectionList =   (`.section-list`);
-
-//  sectionContent =   (`.section-content`); 
+const projectListBtn = document.querySelector(`.project-list-btn`);
+const projectList = document.querySelector(`.project-list`);
+const projectListWrap = document.querySelector(`.project-list-wrap`);
+const projectPinBar = document.querySelector(`.project-pinList`);
+const tools = document.querySelector(`.tools`);
+const sectionBar = document.querySelector(`.section-list`);
+const sectionContent = document.querySelector(`.section-content`);
 */
 
 /* 
@@ -245,16 +241,18 @@ const currentActive = {
 };
 
 
-// dataQuery(testingList, [
-//     {
-//         key: `id`,
-//         value: `2`,
-//         objPath: [`page`],
-//     },
-//     {
-//         key: `name`,
-//         value: `page-2.2`,
-//         objPath: [`content`],
-//     },
-// ]);
+dataQuery(testingList, [
+    {
+        key: `name`,
+        value: `yewu2`,
+        objPath: [`page`],
+    },
+    {
+        key: `name`,
+        value: `page-2.2`,
+        objPath: [`content`],
+    },
+]);
+
+
 */

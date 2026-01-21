@@ -15,9 +15,9 @@
 const projectListBtn = document.querySelector(`.project-list-btn`);
 const projectList = document.querySelector(`.project-list`);
 const projectListWrap = document.querySelector(`.project-list-wrap`);
-const projectPinList = document.querySelector(`.project-pinList`);
+const projectPinBar = document.querySelector(`.project-pinList`);
 const tools = document.querySelector(`.tools`);
-const sectionList = document.querySelector(`.section-list`);
+const sectionBar = document.querySelector(`.section-list`);
 const sectionContent = document.querySelector(`.section-content`);
 
 const testingList = [

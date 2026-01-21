@@ -1,7 +1,3 @@
-const current = {
-    pinList: [],
-};
-
 // ----------------------------  init ----------------------------
 
 function projectListRender() {
@@ -21,55 +17,51 @@ projectListRender();
 // show list btn
 projectListWrap.onclick = (e) => {
     e.stopPropagation();
-    const clicked = e.target;
-    const clickedCl = clicked.classList;
-    const parent = clicked.closest(`.project-item`);
+    const n = e.target;
+    const nCl = n.classList;
+    const parent = n.closest(`.project-item`);
 
-    if (clicked === projectListBtn) {
+    if (n === projectListBtn) {
         projectList.classList.toggle(`hide`);
     }
-    if (clickedCl.contains(`project-item`) || clickedCl.contains(`text`)) {
-        pinClickHandle({
-            node: parent,
-            addPin: true,
-            contentReset: true,
-        });
-    } else if (clickedCl.contains(`edit`)) {
-        editProjectClickHandle(parent);
-    } else if (clickedCl.contains(`destroy`)) {
-        deleteProjectClick(parent);
+    if (nCl.contains(`project-item`) || nCl.contains(`text`)) {
+        //
+        addToPin(parent);
+    } else if (nCl.contains(`edit`)) {
+        //
+    } else if (nCl.contains(`destroy`)) {
+        //
     }
 };
 document.body.onclick = (e) => {
     projectList.classList.add(`hide`);
-    focusInputRemove();
 };
 
 // pin bar
-projectPinList.onclick = (e) => {
+projectPinBar.onclick = (e) => {
     e.stopPropagation();
     const clicked = e.target;
     const eClassList = e.target.classList;
+    const parent = clicked.closest(`.project-pinItem`);
+
     if (eClassList.contains(`project-pinCancel`)) {
-        unpinClickHandle(clicked);
-    }
-    if (eClassList.contains(`project-pinItem`)) {
-        pinClickHandle({
-            node: clicked,
-            addPin: false,
-            contentReset: true,
-        });
+        // unpinClickHandle(clicked);
+    } else if (
+        eClassList.contains(`project-pinItem`) ||
+        eClassList.contains(`text`)
+    ) {
+        addToPin(parent);
     }
 };
 
 // sections
-sectionList.onclick = (e) => {
+sectionBar.onclick = (e) => {
     const parent = e.target.closest(`.section-item`);
 
     e.stopPropagation();
     const eClassList = e.target.classList;
     if (eClassList.contains(`section-item`) || eClassList.contains(`text`)) {
-        sideListActive(parent);
+        sectionActive(parent);
     } else if (eClassList.contains(`edit`)) {
         editSectionClickHandle(parent);
     } else if (eClassList.contains(`destroy`)) {
@@ -90,18 +82,18 @@ function clearActive(parent, childrenClass) {
 }
 
 function makeANode(input) {
-    option = Object.assign(
+    const { tagName, initClass, innerHtml } = Object.assign(
         {
             tagName: `div`,
-            class: ``,
+            initClass: ``,
             innerHtml: ``,
         },
         input,
     );
 
-    const newNode = document.createElement(option.tagName);
-    newNode.className = option.class;
-    newNode.innerHTML = option.innerHtml;
+    const newNode = document.createElement(tagName);
+    newNode.className = initClass;
+    newNode.innerHTML = innerHtml;
 
     return newNode;
 }
@@ -145,7 +137,6 @@ function dataQuery(root, paths) {
         return false;
     }
 
-    // console.log(current);
     return current === root ? false : current;
 }
 
@@ -156,340 +147,118 @@ function querySelectorByText(parent = document, selector, text) {
     });
 }
 
-function updatePinArray() {}
-
 function makeID() {
     return String(Math.floor(Math.random() * 10000)) + `-` + Date.now();
 }
-// ---------------------------- function onclick ----------------------------
 
-const currentActive = {
-    pinID: ``,
-    sectionID: ``,
-    pinList: [],
-};
-// add init set from sever
-
-function pinClickHandle(input) {
-    options = Object.assign(
-        {
-            node: null,
-            addPin: false,
-            contentReset: false,
-        },
-        input,
-    );
-    const { node, addPin, contentReset } = options;
-    const projectID = node.getAttribute("data-project-id");
-
-    // check is Active
-    if (currentActive.pinID === projectID) return;
-
-    if (addPin) {
-        if (currentActive.pinList.includes(projectID)) {
-            //
-        } else {
-            currentActive.pinList.push(projectID);
-        }
-    }
-
-    // update currentActive.pin
-    currentActive.pinID = projectID.trim();
-
-    pinRender();
-    sideListRender();
-    contentRender(contentReset);
+function getActiveProject(atr = false) {
+    const node = projectPinBar.querySelector(`.project-pinItem.active`);
+    return atr === `id` ? node : node.getAttribute(`data-project-id`);
+}
+function getActiveSection(atr = false) {
+    const node = sectionBar.querySelector(`.section-item.active`);
+    return atr === `id` ? node : node.getAttribute(`data-section-id`);
 }
 
-function unpinClickHandle(clicked) {
-    pinList = currentActive.pinList;
-    projectID = clicked
-        .closest(`.project-pinItem`)
-        .getAttribute("data-project-id");
-    arrayDelete(pinList, projectID);
-    if (pinList.length === 0) {
-        currentActive.pin = ``;
-        pinRender();
-        sideListRender(true);
-        contentRender(true);
-    } else {
-        if (currentActive.pinID === projectID) {
-            moveToTheLastPin();
-            sideListRender();
-            contentRender(true);
-        }
-        pinRender();
-    }
-}
-function moveToTheLastPin() {
-    pinList = currentActive.pinList;
-    const lastInList = pinList[pinList.length - 1];
-    currentActive.pinID = lastInList;
-}
+// function
 
-//  ---------------------------- render ----------------------------
-
-function pinRender() {
-    if (currentActive.pinList.length === 0)
-        return (projectPinList.innerHTML = `...`);
-
-    //  render
-    const projectID = currentActive.pinID;
-    const list = currentActive.pinList;
-
-    // get newest names
-    const getName = {};
-    for (let i of testingList) {
-        getName[i.id] = i.name;
-    }
-
-    projectPinList.innerHTML = ``;
-    for (let i of list) {
-        projectPinList.insertAdjacentHTML(
-            `beforeend`,
-            i === projectID
-                ? `<li class="project-pinItem active" data-project-id="${i}" >${getName[i]}<button class="project-pinCancel" >X</button></li>`
-                : `<li class="project-pinItem" data-project-id="${i}" >${getName[i]}<button class="project-pinCancel" >X</button></li>`,
-        );
-    }
-}
-
-function sideListRender(reset = false) {
-    if (reset) {
-        currentActive.sectionID = ``;
-        return (sectionList.innerHTML = `...`);
-    }
-    const data = dataQuery(testingList, [
+function getProjectSource(projectId) {
+    const output = dataQuery(testingList, [
         {
             key: `id`,
-            value: `${currentActive.pinID}`,
+            value: projectId,
+            objPath: [],
+        },
+    ]);
+    return output;
+}
+function getSectionSource(projectId, sectionId) {
+    const output = dataQuery(testingList, [
+        {
+            key: `id`,
+            value: projectId,
+            objPath: [`page`],
+        },
+        {
+            key: `id`,
+            value: sectionId,
+            objPath: [],
+        },
+    ]);
+    return output;
+}
+function getSectionSourceList(projectId) {
+    const output = dataQuery(testingList, [
+        {
+            key: `id`,
+            value: projectId,
             objPath: [`page`],
         },
     ]);
-    if (!data) {
-        sectionList.innerHTML = `...`;
-        return console.log(`section render : no match data`);
-    }
-    // render
-    let html = `<li class="section-item-add">add</li>`;
-    for (let i of data) {
-        html += `<li class="section-item" data-section-id="${i.id}" ><span class="text">${i.name}</span><button class="edit">E</button><button class="destroy">D</button></li>`;
-    }
-    sectionList.innerHTML = html;
+    return output;
 }
 
-function sideListActive(sectionNode) {
-    const sectionID = sectionNode.getAttribute("data-section-id");
-
-    if (!sectionNode.classList.contains(`active`)) {
-        clearActive(sectionList, `.section-item.active`);
-        currentActive.sectionID = sectionID;
-        sectionNode.classList.add(`active`);
-        contentRender();
-    }
-}
-
-function contentRender(reset = false) {
-    if (reset) return (sectionContent.innerHTML = `...`);
-
-    const data = dataQuery(testingList, [
+function getContentSourceList(projectId, sectionId) {
+    const output = dataQuery(testingList, [
         {
             key: `id`,
-            value: `${currentActive.pinID}`,
+            value: projectId,
             objPath: [`page`],
         },
         {
             key: `id`,
-            value: `${currentActive.sectionID}`,
+            value: sectionId,
             objPath: [`content`],
         },
     ]);
-
-    sectionContent.innerHTML = ``;
-    for (let i of data) {
-        sectionContent.insertAdjacentHTML(
-            `beforeend`,
-            `<li class="section-content-card" >${i.type} \n ${i.html}</li>`,
-        );
-    }
+    return output;
 }
 
-//  ---------------------------- modified ----------------------------
+// ---------------------------- function onclick ----------------------------
 
-function editProjectClickHandle(e) {
-    obj = {
-        dataAddress: dataQuery(testingList, [
-            {
-                key: `id`,
-                value: e.getAttribute(`data-project-id`),
-                objPath: [],
-            },
-        ]),
-        textQuerySelector: `.project-item .text`,
-        renderPart: `project`,
-        editingTag: e,
-    };
-    editHandle(obj);
-}
+function parentCLear(parent) {}
 
-function editSectionClickHandle(e) {
-    obj = {
-        dataAddress: dataQuery(testingList, [
-            {
-                key: `id`,
-                value: currentActive.pinID,
-                objPath: [`page`],
-            },
-            {
-                key: `id`,
-                value: e.getAttribute(`data-section-id`),
-                objPath: [],
-            },
-        ]),
-        textQuerySelector: `.project-item .text`,
-        renderPart: `section`,
-        editingTag: e,
-    };
-    editHandle(obj);
-}
-
-//  ---------------------------- modified process ----------------------------
-
-function focusInputRemove() {
-    // let focusInput = editHandle.focusInput;
-    // input node delete
-    if (!editHandle.focusInput) return;
-
-    editHandle.focusInput.remove();
-    editHandle.focusInput.onclick = null;
-    editHandle.focusInput = null;
-    editHandle.focusInput = null;
-}
-
-// let focusInput = null;
-function editHandle(obj) {
-    if (editHandle.focusInput) {
-        editHandle.focusInput.querySelector(`input`).focus();
-        return;
-    }
-
-    const { dataAddress, textQuerySelector, renderPart, editingTag } = obj;
-
-    let inputNode = makeANode({
-        tagName: `div`,
-        class: `getTempText`,
-        innerHtml: `<input type="text"><button class="submit" >V</button><button class="close" >X</button>`,
+function clearActive(parent) {
+    const list = Array.from(parent.children);
+    list.forEach((node) => {
+        node.classList.remove(`active`);
     });
-
-    const inputTag = inputNode.querySelector(`input`);
-    const oldName = editingTag.querySelector(`.text`).textContent;
-    inputTag.value = oldName;
-
-    inputNode.onclick = (e) => {
-        const eCl = e.target.classList;
-        if (eCl.contains(`submit`)) {
-            //
-            const newName = inputTag.value;
-
-            const isDul = querySelectorByText(
-                projectList,
-                textQuerySelector,
-                newName,
-            );
-
-            if (isDul === undefined || isDul.textContent === oldName) {
-                // update to sever then update
-
-                dataAddress.name = newName;
-                // render after modified
-                if (renderPart === `project`) {
-                    projectListRender();
-                    pinRender();
-                } else if (renderPart === `section`) {
-                    sideListRender();
-                }
-            } else {
-                return console.log(`it is dul bro`);
-            }
-        } else if (eCl.contains(`close`)) {
-            //
-        } else {
-            return;
-        }
-        focusInputRemove();
-    };
-
-    editHandle.focusInput = inputNode;
-    editingTag.append(inputNode);
 }
 
-// delete
+function addToPin(tag) {
+    const id = tag.getAttribute(`data-project-id`);
+    const tagText = tag.querySelector(`.text`).textContent;
+    const isExisted = projectPinBar.querySelector(`[data-project-id="${id}"]`);
 
-function deleteProjectClick(e) {
-    const tagId = e.getAttribute(`data-project-id`);
-    const obj = {
-        idList: currentActive.pinList,
-        id: tagId,
-        dataSource: testingList,
-        deleteData: dataQuery(testingList, [
-            {
-                key: `id`,
-                value: tagId,
-                objPath: [],
-            },
-        ]),
-        type: `project`,
-    };
-    deleteHandle(obj);
-}
-
-function deleteSectionClick(e) {
-    const tagId = e.getAttribute(`data-section-id`);
-    const obj = {
-        id: tagId,
-        dataSource: dataQuery(testingList, [
-            {
-                key: `id`,
-                value: currentActive.pinID,
-                objPath: [`page`],
-            },
-        ]),
-        deleteData: dataQuery(testingList, [
-            {
-                key: `id`,
-                value: currentActive.pinID,
-                objPath: [`page`],
-            },
-            {
-                key: `id`,
-                value: tagId,
-                objPath: [],
-            },
-        ]),
-        type: `section`,
-    };
-    deleteHandle(obj);
-}
-
-function deleteHandle(obj) {
-    const { idList, id, dataSource, deleteData, type } = obj;
-
-    arrayDelete(dataSource, deleteData);
-    if (type === `project`) {
-        arrayDelete(idList, id);
-        if (currentActive.pinID === id) {
-            moveToTheLastPin();
-        }
-        projectListRender();
-        pinRender();
+    clearActive(projectPinBar);
+    if (!isExisted) {
+        projectPinBar.insertAdjacentHTML(
+            `beforeend`,
+            `<li class="project-pinItem active" data-project-id="${id}" > <span class="text">${tagText}</span> <button class="project-pinCancel" >X</button></li>`,
+        );
+    } else {
+        isExisted.classList.add(`active`);
     }
-
-    console.log(currentActive.sectionID, id);
-
-    if (type === `section` && currentActive.sectionID === id) {
-        contentRender(true);
-    }
-    sideListRender();
+    sectionBarRender(id);
 }
 
-//  ---------------------------- check ----------------------------
+function sectionBarRender(projectId) {
+    const list = getSectionSourceList(projectId);
+
+    // render
+    let html = `<li class="section-item-add">add</li>`;
+    for (let i of list) {
+        html += `<li class="section-item" data-section-id="${i.id}" ><span class="text">${i.name}</span><button class="edit">E</button><button class="destroy">D</button></li>`;
+    }
+    sectionBar.innerHTML = html;
+}
+
+function sectionActive(tag) {
+    clearActive(sectionBar);
+    tag.classList.add(`active`);
+    const id = tag.getAttribute(`data-section-id`);
+    const projectId = getActiveProject(`id`);
+    const data = getContentSourceList(projectId, id);
+}
+
+function contentRender() {}
