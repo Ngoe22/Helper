@@ -23,25 +23,26 @@ projectListWrap.onclick = (e) => {
     e.stopPropagation();
     const clicked = e.target;
     const clickedCl = clicked.classList;
+    const parent = clicked.closest(`.project-item`);
 
     if (clicked === projectListBtn) {
         projectList.classList.toggle(`hide`);
     }
     if (clickedCl.contains(`project-item`) || clickedCl.contains(`text`)) {
         pinClickHandle({
-            node: clicked.closest(`.project-item`),
+            node: parent,
             addPin: true,
             contentReset: true,
         });
     } else if (clickedCl.contains(`edit`)) {
-        editProjectClickHandle(clicked.closest(`.project-item`));
+        editProjectClickHandle(parent);
     } else if (clickedCl.contains(`destroy`)) {
-        // destroySection();
+        deleteProjectClick(parent);
     }
 };
 document.body.onclick = (e) => {
     projectList.classList.add(`hide`);
-    // focusInputRemove();
+    focusInputRemove();
 };
 
 // pin bar
@@ -63,12 +64,16 @@ projectPinList.onclick = (e) => {
 
 // sections
 sectionList.onclick = (e) => {
+    const parent = e.target.closest(`.section-item`);
+
     e.stopPropagation();
     const eClassList = e.target.classList;
     if (eClassList.contains(`section-item`) || eClassList.contains(`text`)) {
-        sideListActive(e.target.closest(`.section-item`));
+        sideListActive(parent);
     } else if (eClassList.contains(`edit`)) {
-        editSectionClickHandle(e.target.closest(`.section-item`));
+        editSectionClickHandle(parent);
+    } else if (eClassList.contains(`destroy`)) {
+        deleteSectionClick(parent);
     }
 };
 
@@ -120,21 +125,26 @@ function dataQuery(root, paths) {
     let current = root;
     let currentL = current.length;
 
-    while (1) {
-        if (current[currentI][paths[pathI].key] === paths[pathI].value) {
-            current = current[currentI];
-            const temp = paths[pathI].objPath;
+    try {
+        while (1) {
+            if (current[currentI][paths[pathI].key] === paths[pathI].value) {
+                current = current[currentI];
+                const temp = paths[pathI].objPath;
 
-            for (i of temp) {
-                current = current[i];
+                for (i of temp) {
+                    current = current[i];
+                }
+                currentL = current.length;
+                currentI = -1;
+                pathI++;
             }
-            currentL = current.length;
-            currentI = -1;
-            pathI++;
+            currentI++;
+            if (currentI >= currentL || pathI >= pathL) break;
         }
-        currentI++;
-        if (currentI >= currentL || pathI >= pathL) break;
+    } catch {
+        return false;
     }
+
     // console.log(current);
     return current === root ? false : current;
 }
@@ -149,9 +159,7 @@ function querySelectorByText(parent = document, selector, text) {
 function updatePinArray() {}
 
 function makeID() {
-    console.log(String(Math.floor(Math.random() * 10000)) + `-` + Date.now());
-
-    return;
+    return String(Math.floor(Math.random() * 10000)) + `-` + Date.now();
 }
 // ---------------------------- function onclick ----------------------------
 
@@ -206,13 +214,17 @@ function unpinClickHandle(clicked) {
         contentRender(true);
     } else {
         if (currentActive.pinID === projectID) {
-            const lastInList = pinList[pinList.length - 1];
-            currentActive.pinID = lastInList;
+            moveToTheLastPin();
             sideListRender();
             contentRender(true);
         }
         pinRender();
     }
+}
+function moveToTheLastPin() {
+    pinList = currentActive.pinList;
+    const lastInList = pinList[pinList.length - 1];
+    currentActive.pinID = lastInList;
 }
 
 //  ---------------------------- render ----------------------------
@@ -254,8 +266,11 @@ function sideListRender(reset = false) {
             objPath: [`page`],
         },
     ]);
-    if (!data) return console.log(`no match data`);
-    //
+    if (!data) {
+        sectionList.innerHTML = `...`;
+        return console.log(`section render : no match data`);
+    }
+    // render
     let html = `<li class="section-item-add">add</li>`;
     for (let i of data) {
         html += `<li class="section-item" data-section-id="${i.id}" ><span class="text">${i.name}</span><button class="edit">E</button><button class="destroy">D</button></li>`;
@@ -264,11 +279,11 @@ function sideListRender(reset = false) {
 }
 
 function sideListActive(sectionNode) {
-    const sectionName = sectionNode.getAttribute("data-section-id");
+    const sectionID = sectionNode.getAttribute("data-section-id");
 
     if (!sectionNode.classList.contains(`active`)) {
         clearActive(sectionList, `.section-item.active`);
-        currentActive.sectionID = sectionName;
+        currentActive.sectionID = sectionID;
         sectionNode.classList.add(`active`);
         contentRender();
     }
@@ -318,8 +333,6 @@ function editProjectClickHandle(e) {
 }
 
 function editSectionClickHandle(e) {
-    console.log(e);
-
     obj = {
         dataAddress: dataQuery(testingList, [
             {
@@ -337,29 +350,26 @@ function editSectionClickHandle(e) {
         renderPart: `section`,
         editingTag: e,
     };
-    console.log(obj);
-
     editHandle(obj);
 }
 
 //  ---------------------------- modified process ----------------------------
 
 function focusInputRemove() {
+    // let focusInput = editHandle.focusInput;
     // input node delete
-    if (!focusInput) return;
+    if (!editHandle.focusInput) return;
 
-    focusInput.remove();
-    focusInput.onclick = null;
-    focusInput = null;
-    focusInput = null;
+    editHandle.focusInput.remove();
+    editHandle.focusInput.onclick = null;
+    editHandle.focusInput = null;
+    editHandle.focusInput = null;
 }
 
-let focusInput = null;
+// let focusInput = null;
 function editHandle(obj) {
-    console.log(focusInput);
-
-    if (focusInput) {
-        focusInput.querySelector(`input`).focus();
+    if (editHandle.focusInput) {
+        editHandle.focusInput.querySelector(`input`).focus();
         return;
     }
 
@@ -370,8 +380,6 @@ function editHandle(obj) {
         class: `getTempText`,
         innerHtml: `<input type="text"><button class="submit" >V</button><button class="close" >X</button>`,
     });
-
-    console.log(inputNode);
 
     const inputTag = inputNode.querySelector(`input`);
     const oldName = editingTag.querySelector(`.text`).textContent;
@@ -411,9 +419,77 @@ function editHandle(obj) {
         focusInputRemove();
     };
 
-    focusInput = inputNode;
+    editHandle.focusInput = inputNode;
     editingTag.append(inputNode);
-    console.log(editingTag);
+}
+
+// delete
+
+function deleteProjectClick(e) {
+    const tagId = e.getAttribute(`data-project-id`);
+    const obj = {
+        idList: currentActive.pinList,
+        id: tagId,
+        dataSource: testingList,
+        deleteData: dataQuery(testingList, [
+            {
+                key: `id`,
+                value: tagId,
+                objPath: [],
+            },
+        ]),
+        type: `project`,
+    };
+    deleteHandle(obj);
+}
+
+function deleteSectionClick(e) {
+    const tagId = e.getAttribute(`data-section-id`);
+    const obj = {
+        id: tagId,
+        dataSource: dataQuery(testingList, [
+            {
+                key: `id`,
+                value: currentActive.pinID,
+                objPath: [`page`],
+            },
+        ]),
+        deleteData: dataQuery(testingList, [
+            {
+                key: `id`,
+                value: currentActive.pinID,
+                objPath: [`page`],
+            },
+            {
+                key: `id`,
+                value: tagId,
+                objPath: [],
+            },
+        ]),
+        type: `section`,
+    };
+    deleteHandle(obj);
+}
+
+function deleteHandle(obj) {
+    const { idList, id, dataSource, deleteData, type } = obj;
+
+    arrayDelete(dataSource, deleteData);
+    if (type === `project`) {
+        arrayDelete(idList, id);
+        if (currentActive.pinID === id) {
+            moveToTheLastPin();
+        }
+        projectListRender();
+        pinRender();
+    }
+
+    console.log(currentActive.sectionID, id);
+
+    if (type === `section` && currentActive.sectionID === id) {
+        contentRender(true);
+    }
+    sideListRender();
 }
 
 //  ---------------------------- check ----------------------------
