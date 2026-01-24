@@ -7,9 +7,13 @@ async function getData(id) {
         if (!response.ok) throw new Error("Không tìm thấy bài viết");
 
         const data = await response.json();
+
         // console.log(`Chi tiết bài ${id}:`, data);
+        console.log(`done`);
+        return data;
     } catch (error) {
         console.error("Lỗi:", error);
+        return false;
     }
 }
 
@@ -25,6 +29,7 @@ async function postData(data) {
 
         const newPost = await response.json();
         console.log("Đã tạo thành công:", newPost);
+        return newPost;
     } catch (error) {
         console.error("Lỗi khi tạo:", error);
     }
@@ -60,8 +65,10 @@ async function updateData(id, data) {
         });
         const updatedPost = await response.json();
         console.log("Đã cập nhật (vá) thành công:", updatedPost);
+        return updatedPost;
     } catch (error) {
         console.error("Lỗi:", error);
+        return false;
     }
 }
 
