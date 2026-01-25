@@ -139,6 +139,10 @@ body {
     display: none !important ;
 }
 
+.none-touch {
+    pointer-events: none !important ;
+}
+
 /* ----------------------------  common ---------------------------- */
 
 .main-wrapper {

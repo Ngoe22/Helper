@@ -202,7 +202,10 @@ function deleteArrayElById(array, id) {
     if (index) array.splice(index, 1);
 }
 
-function editTextOfTag(parentNode, selector, text) {}
+function editTextOfTag(parentTag, selector, text) {
+    const tag = parentTag.querySelector(selector);
+    if (tag) return (tag.textContent = text);
+}
 
 // ---------------------------- function onclick ----------------------------
 
@@ -221,7 +224,8 @@ function clearActive(parent) {
 
 function checkDulNameInList(list, oldName, newName) {
     for (let i of list) {
-        if (i.textContent == newName && i.textContent != oldName) {
+        console.log(i.name, newName, oldName);
+        if (i.name === newName && i.name !== oldName) {
             return true;
         }
     }
@@ -239,6 +243,7 @@ function addInputTag(parentTag, submitCb) {
         addInputTag.onClose = () => {
             addInputTag.inputTag.remove();
             addInputTag.inputText.value = ``;
+            // inputTag.classList.remove(`none-touch`);
         };
     }
     const [inputTag] = [addInputTag.inputTag];
@@ -253,13 +258,16 @@ function addInputTag(parentTag, submitCb) {
         e.stopPropagation();
         const cl = e.target.classList;
         if (cl.contains(`submit`)) {
+            // inputTag.classList.add(`none-touch`);
             //
-            if (submitCb(inputTag)) {
-                addInputTag.onClose();
-                console.log(` callback return true`);
-            } else {
-                console.log(` callback return false`);
-            }
+            submitCb(inputTag).then((result) => {
+                if (result) {
+                    addInputTag.onClose();
+                } else {
+                    // inputTag.classList.remove(`none-touch`);
+                    addInputTag.inputText.focus();
+                }
+            });
         } else if (cl.contains(`close`)) {
             //
             addInputTag.onClose();
@@ -269,78 +277,53 @@ function addInputTag(parentTag, submitCb) {
 
 // editTagNameCheck
 // editTagName
-function editTagName(tag, type = ``) {
-    if (![`section`, `project`].includes(type)) return;
+async function editTagName(tag, type = ``) {
+    if (![`section`, `project`].includes(type)) return false;
 
     async function editTagNameCallBack(inputTag) {
         const id = tag.getAttribute(`data-${type}-id`);
         const newName = inputTag.querySelector(`input`).value;
         const oldName = tag.querySelector(`.text`).textContent;
-        const tagParent = type === `section` ? sectionBar : projectList;
-        const list = Array.from(tagParent.querySelectorAll(`.text`));
 
-        //
-        // if (newName === ``) return console.log(`empty`);
-
-        // if (!checkDulNameInList(list, oldName, newName)) {
-        //     console.log(`it is dul`);
-        //     return;
-        // }
-
+        if (newName === oldName) return true;
         if (
             waterFallOfIf(
-                [newName === ``, checkDulNameInList(list, oldName, newName)],
+                [
+                    newName === ``,
+                    checkDulNameInList(testingList, oldName, newName),
+                ],
                 [`empty`, `it is dul`],
             )
-        ) {
-            console.log(`return false`);
+        )
             return false;
-        }
-
-        return;
-
-        if (type === `section`) {
-            const projectId = getActiveProject(`id`);
-            const source = getProjectSource(projectId);
-            const clone = structuredClone(source);
-            const sectionSource = getSectionSource(projectId, id);
-            clone.page.forEach((page) => {
-                if (page.id === id) page.name = newName;
-            });
-
-            const result = await updateData(projectId, clone);
-            console.log(result);
-            if (!result) return;
-
-            // if done
-            sectionSource.name = newName;
-            textTag.textContent = newName;
-        } else {
-            const source = getProjectSource(id);
-            console.log(source);
-
-            // update server
-            const clone = structuredClone(source);
-            clone.name = newName;
-
-            const result = await updateData(id, clone);
-            console.log(result);
-            if (!result) return;
-            // const result = deleteData(id);
-
-            // if done
-            source.name = newName;
-            textTag.textContent = newName;
-            const pinNode = projectPinBar.querySelector(
-                `[data-project-id="${id}"] .text`,
-            );
-            if (pinNode) pinNode.textContent = newName;
-        }
-
-        inputTag.querySelector(`input`).value = ``;
+        const result =
+            type === `project`
+                ? await projectUpdateToServer(id, newName)
+                : await sectionUpdateToServer(id, newName);
         return true;
+        //
     }
     addInputTag(tag, editTagNameCallBack);
+}
+async function projectUpdateToServer(id, newName) {
+    // const clone = structuredClone(getProjectSource(id));
+    // clone.name = newName;
+    if (!(await updateData(id, { name: newName }))) return false;
+    updateMainData();
+    editTextOfTag(projectList, `[data-project-id="${id}"] .text`, newName);
+    editTextOfTag(projectPinBar, `[data-project-id="${id}"] .text`, newName);
+    return true;
+}
+async function sectionUpdateToServer(id, newName) {
+    const projectId = getActiveProject(`id`);
+    const clone = structuredClone(getSectionSourceList(projectId));
+    for (let i of clone) {
+        if (i.id === id) i.name = newName;
+    }
+    if (!(await updateData(projectId, { page: clone }))) return false;
+    updateMainData();
+    editTextOfTag(sectionBar, `[data-section-id="${id}"] .text`, newName);
+    return true;
 }
 
 function addTag(tag, type = ``) {
@@ -348,14 +331,22 @@ function addTag(tag, type = ``) {
 
     async function addTagCallBack(inputTag) {
         // xu ly xss
+        // project
+        const id = tag.getAttribute(`data-${type}-id`);
         const newName = inputTag.querySelector(`input`).value.trim();
-        if (newName === ``) return console.log(`empty`);
-        const listFrom = type === `section` ? sectionBar : projectList;
-        const list = Array.from(listFrom.querySelectorAll(`.text`));
-        //
-        if (!checkDulNameInList(list, ``, newName))
-            return console.log(`it is dul`);
 
+        // if (newName === ``) return true;
+        if (
+            waterFallOfIf(
+                [newName === ``, checkDulNameInList(testingList, ``, newName)],
+                [`empty`, `it is dul`],
+            )
+        )
+            return false;
+
+        console.log(`pass`);
+
+        return true;
         const newObj = {
             name: newName,
             // id: newId,
@@ -402,7 +393,6 @@ function addTag(tag, type = ``) {
 
 function projectListRender() {
     projectList.innerHTML = `<li class="project-item add">add</li>`;
-
     testingList.forEach((value) => {
         //
         projectList.insertAdjacentHTML(
@@ -465,9 +455,12 @@ function closePin(tag) {
 // section
 
 function sectionBarRender(projectId) {
+    console.log(`inside sectionBarRender`);
+
     const list = getSectionSourceList(projectId);
     // render
     let html = `<li class="section-item add">add</li>`;
+    console.log(list);
 
     if (list) {
         for (let i of list) {
@@ -484,23 +477,24 @@ function sectionActive(tag) {
     contentRender(tag.getAttribute(`data-section-id`));
 }
 
-function deleteSection(tag) {
+async function deleteSection(tag) {
     const id = tag.getAttribute(`data-section-id`);
     const projectId = getActiveProject(`id`);
-    const list = getSectionSourceList(projectId);
 
     // send delete on server
 
-    const clone = getProjectSource(projectId);
-    deleteArrayElById(clone.page, id);
+    const clone = structuredClone(getSectionSourceList(projectId));
+    deleteArrayElById(clone, id);
     console.log(clone);
 
-    updateData(projectId, clone);
+    if (!(await updateData(projectId, { page: clone }))) return false;
 
-    // if done
-    deleteArrayElById(list, id);
+    console.log(`wait await`);
+
+    await updateMainData();
     sectionBarRender(projectId);
     parentCLear([sectionContent]);
+    return true;
 }
 
 // content
