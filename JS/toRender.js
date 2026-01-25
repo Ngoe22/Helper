@@ -28,7 +28,10 @@ projectList.onclick = (e) => {
 };
 document.body.onclick = (e) => {
     projectList.classList.add(`hide`);
-    if (addInputTag.inputTag) addInputTag.inputTag.remove();
+    if (addInputTag.inputTag) {
+        addInputTag.inputTag.remove();
+        addInputTag.inputText.value = ``;
+    }
 };
 // pin bar
 projectPinBar.onclick = (e) => {
@@ -191,13 +194,15 @@ function getContentSourceList(projectId, sectionId) {
         },
     ]);
 }
-function deleteData(array, id) {
+function deleteArrayElById(array, id) {
     let index = null;
     for (let i in array) {
         if (array[i].id === id) index = i;
     }
     if (index) array.splice(index, 1);
 }
+
+function editTextOfTag(parentNode, selector, text) {}
 
 // ---------------------------- function onclick ----------------------------
 
@@ -217,10 +222,10 @@ function clearActive(parent) {
 function checkDulNameInList(list, oldName, newName) {
     for (let i of list) {
         if (i.textContent == newName && i.textContent != oldName) {
-            return false;
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 function addInputTag(parentTag, submitCb) {
@@ -230,8 +235,13 @@ function addInputTag(parentTag, submitCb) {
             initClass: `getTempText`,
             innerHtml: `<input  type="text"><button class="submit" >V</button><button class="close" >X</button>`,
         });
+        addInputTag.inputText = addInputTag.inputTag.querySelector(`input`);
+        addInputTag.onClose = () => {
+            addInputTag.inputTag.remove();
+            addInputTag.inputText.value = ``;
+        };
     }
-    const inputTag = addInputTag.inputTag;
+    const [inputTag] = [addInputTag.inputTag];
 
     // add init value
     const defaultText = parentTag.querySelector(`.text`);
@@ -244,31 +254,50 @@ function addInputTag(parentTag, submitCb) {
         const cl = e.target.classList;
         if (cl.contains(`submit`)) {
             //
-            if (submitCb(inputTag)) inputTag.remove();
+            if (submitCb(inputTag)) {
+                addInputTag.onClose();
+                console.log(` callback return true`);
+            } else {
+                console.log(` callback return false`);
+            }
         } else if (cl.contains(`close`)) {
             //
-            inputTag.querySelector(`input`).value = ``;
-            inputTag.remove();
+            addInputTag.onClose();
         }
     };
 }
 
+// editTagNameCheck
+// editTagName
 function editTagName(tag, type = ``) {
     if (![`section`, `project`].includes(type)) return;
-    const id = tag.getAttribute(`data-${type}-id`);
 
     async function editTagNameCallBack(inputTag) {
+        const id = tag.getAttribute(`data-${type}-id`);
         const newName = inputTag.querySelector(`input`).value;
-        if (newName === ``) return console.log(`empty`);
-
-        const textTag = tag.querySelector(`.text`);
-        const oldName = textTag.textContent;
-        const listFrom = type === `section` ? sectionBar : projectList;
-        const list = Array.from(listFrom.querySelectorAll(`.text`));
+        const oldName = tag.querySelector(`.text`).textContent;
+        const tagParent = type === `section` ? sectionBar : projectList;
+        const list = Array.from(tagParent.querySelectorAll(`.text`));
 
         //
-        if (!checkDulNameInList(list, oldName, newName))
-            return console.log(`it is dul`);
+        // if (newName === ``) return console.log(`empty`);
+
+        // if (!checkDulNameInList(list, oldName, newName)) {
+        //     console.log(`it is dul`);
+        //     return;
+        // }
+
+        if (
+            waterFallOfIf(
+                [newName === ``, checkDulNameInList(list, oldName, newName)],
+                [`empty`, `it is dul`],
+            )
+        ) {
+            console.log(`return false`);
+            return false;
+        }
+
+        return;
 
         if (type === `section`) {
             const projectId = getActiveProject(`id`);
@@ -311,7 +340,6 @@ function editTagName(tag, type = ``) {
         inputTag.querySelector(`input`).value = ``;
         return true;
     }
-
     addInputTag(tag, editTagNameCallBack);
 }
 
@@ -384,12 +412,18 @@ function projectListRender() {
     });
 }
 
-function deleteProject(tag) {
+async function deleteProject(tag) {
+    console.log(`meow`);
+
     const id = tag.getAttribute(`data-project-id`);
 
     // send delete to server
+
+    const result = await deleteData(id);
+    console.log(result);
+    console.log(`meow`);
     // if done
-    deleteData(testingList, id);
+    deleteArrayElById(testingList, id);
     closePin(tag);
     projectListRender();
 }
@@ -454,9 +488,17 @@ function deleteSection(tag) {
     const id = tag.getAttribute(`data-section-id`);
     const projectId = getActiveProject(`id`);
     const list = getSectionSourceList(projectId);
-    deleteData(list, id);
+
     // send delete on server
+
+    const clone = getProjectSource(projectId);
+    deleteArrayElById(clone.page, id);
+    console.log(clone);
+
+    updateData(projectId, clone);
+
     // if done
+    deleteArrayElById(list, id);
     sectionBarRender(projectId);
     parentCLear([sectionContent]);
 }

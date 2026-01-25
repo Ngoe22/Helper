@@ -23,11 +23,11 @@ const sectionContent = document.querySelector(`.section-content`);
 // console.log(testingList);
 let testingList = [];
 
-async function startWeb() {
+async function updateMainData() {
     testingList = await getData();
     projectListRender();
 }
-startWeb();
+updateMainData();
 
 // const testingList = [
 //     {
@@ -149,3 +149,13 @@ startWeb();
 // project = testingList + forEach
 // page = testingList.page + forEach
 // content = testingList.page.content + forEach
+
+function waterFallOfIf(values, logText) {
+    for (let i in values) {
+        if (values[i]) {
+            console.log(logText[i]);
+            return true;
+        }
+    }
+    return false;
+}
