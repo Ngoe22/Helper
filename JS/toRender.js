@@ -224,7 +224,6 @@ function clearActive(parent) {
 
 function checkDulNameInList(list, oldName, newName) {
     for (let i of list) {
-        console.log(i.name, newName, oldName);
         if (i.name === newName && i.name !== oldName) {
             return true;
         }
@@ -243,7 +242,7 @@ function addInputTag(parentTag, submitCb) {
         addInputTag.onClose = () => {
             addInputTag.inputTag.remove();
             addInputTag.inputText.value = ``;
-            // inputTag.classList.remove(`none-touch`);
+            inputTag.classList.remove(`none-touch`);
         };
     }
     const [inputTag] = [addInputTag.inputTag];
@@ -258,13 +257,13 @@ function addInputTag(parentTag, submitCb) {
         e.stopPropagation();
         const cl = e.target.classList;
         if (cl.contains(`submit`)) {
-            // inputTag.classList.add(`none-touch`);
+            inputTag.classList.add(`none-touch`);
             //
             submitCb(inputTag).then((result) => {
                 if (result) {
                     addInputTag.onClose();
                 } else {
-                    // inputTag.classList.remove(`none-touch`);
+                    inputTag.classList.remove(`none-touch`);
                     addInputTag.inputText.focus();
                 }
             });
@@ -277,31 +276,32 @@ function addInputTag(parentTag, submitCb) {
 
 // editTagNameCheck
 // editTagName
-async function editTagName(tag, type = ``) {
+function editTagName(tag, type = ``) {
     if (![`section`, `project`].includes(type)) return false;
 
     async function editTagNameCallBack(inputTag) {
         const id = tag.getAttribute(`data-${type}-id`);
         const newName = inputTag.querySelector(`input`).value;
         const oldName = tag.querySelector(`.text`).textContent;
-
+        const dulRange =
+            type === `project`
+                ? testingList
+                : getSectionSourceList(getActiveProject(`id`));
         if (newName === oldName) return true;
         if (
             waterFallOfIf(
                 [
                     newName === ``,
-                    checkDulNameInList(testingList, oldName, newName),
+                    checkDulNameInList(dulRange, oldName, newName),
                 ],
                 [`empty`, `it is dul`],
             )
         )
             return false;
-        const result =
+        return (result =
             type === `project`
                 ? await projectUpdateToServer(id, newName)
-                : await sectionUpdateToServer(id, newName);
-        return true;
-        //
+                : await sectionUpdateToServer(id, newName));
     }
     addInputTag(tag, editTagNameCallBack);
 }
@@ -326,67 +326,63 @@ async function sectionUpdateToServer(id, newName) {
     return true;
 }
 
+//  adding tag
+
 function addTag(tag, type = ``) {
     if (![`section`, `project`].includes(type)) return;
 
     async function addTagCallBack(inputTag) {
         // xu ly xss
         // project
-        const id = tag.getAttribute(`data-${type}-id`);
         const newName = inputTag.querySelector(`input`).value.trim();
-
-        // if (newName === ``) return true;
+        const dulRange =
+            type === `project`
+                ? testingList
+                : getSectionSourceList(getActiveProject(`id`));
         if (
             waterFallOfIf(
-                [newName === ``, checkDulNameInList(testingList, ``, newName)],
+                [newName === ``, checkDulNameInList(dulRange, ``, newName)],
                 [`empty`, `it is dul`],
             )
         )
             return false;
-
-        console.log(`pass`);
-
-        return true;
-        const newObj = {
-            name: newName,
-            // id: newId,
-            [type === `project` ? `page` : `content`]: [],
-        };
-
-        if (type === `project`) {
-            var source = testingList;
-            var parent = projectList;
-
-            //  append newObj to server
-            var result = await postData(newObj);
-            var newId = result.id;
-            newObj.id = newId;
-            //
-        } else {
-            const projectId = getActiveProject(`id`);
-            var source = getSectionSourceList(projectId);
-            var parent = sectionBar;
-            var copyProject = structuredClone(getProjectSource(projectId));
-            var newId = makeID();
-            newObj.id = newId;
-            copyProject.page.push(newObj);
-
-            //  append copyProject to server
-            var result = await updateData(projectId, copyProject);
-        }
-        // console.log(newObj);
-
-        source.push(newObj);
-        parent.insertAdjacentHTML(
-            `beforeend`,
-            `<li class="${type}-item" data-${type}-id="${newObj.id}"><span class="text">${newName}</span><button class="edit">E</button><button class="destroy">D</button></li>`,
-        );
-        console.log(testingList);
-
-        inputTag.querySelector(`input`).value = ``;
-        return true;
+        return (result =
+            type === `project`
+                ? await addProjectToServer(newName)
+                : await addSectionToServer(newName));
     }
     addInputTag(tag, addTagCallBack);
+}
+async function addProjectToServer(newName) {
+    const results = await postData({
+        name: newName,
+        page: [],
+    });
+    if (!results.id) return false;
+    updateMainData();
+    projectList.insertAdjacentHTML(
+        `beforeend`,
+        `<li class="project-item" data-project-id="${results.id}"><span class="text">${newName}</span><button class="edit">E</button><button class="destroy">D</button></li>`,
+    );
+    return true;
+}
+async function addSectionToServer(newName) {
+    const newId = makeID();
+    const projectId = getActiveProject(`id`);
+    const clone = structuredClone(getSectionSourceList(projectId));
+    clone.push({
+        name: newName,
+        id: newId,
+        content: [],
+    });
+    const result = await updateData(projectId, { page: clone });
+    if (!result) return false;
+    await updateMainData();
+    sectionBar.insertAdjacentHTML(
+        `beforeend`,
+        `<li class="section-item" data-section-id="${newId}"><span class="text">${newName}</span><button class="edit">E</button><button class="destroy">D</button></li>`,
+    );
+    return true;
 }
 
 // project list
@@ -403,18 +399,10 @@ function projectListRender() {
 }
 
 async function deleteProject(tag) {
-    console.log(`meow`);
-
     const id = tag.getAttribute(`data-project-id`);
-
-    // send delete to server
-
     const result = await deleteData(id);
-    console.log(result);
-    console.log(`meow`);
-    // if done
-    deleteArrayElById(testingList, id);
     closePin(tag);
+    await updateMainData();
     projectListRender();
 }
 
@@ -460,8 +448,6 @@ function sectionBarRender(projectId) {
     const list = getSectionSourceList(projectId);
     // render
     let html = `<li class="section-item add">add</li>`;
-    console.log(list);
-
     if (list) {
         for (let i of list) {
             html += `<li class="section-item" data-section-id="${i.id}" ><span class="text">${i.name}</span><button class="edit">E</button><button class="destroy">D</button></li>`;
@@ -480,20 +466,13 @@ function sectionActive(tag) {
 async function deleteSection(tag) {
     const id = tag.getAttribute(`data-section-id`);
     const projectId = getActiveProject(`id`);
-
     // send delete on server
-
     const clone = structuredClone(getSectionSourceList(projectId));
     deleteArrayElById(clone, id);
-    console.log(clone);
-
     if (!(await updateData(projectId, { page: clone }))) return false;
-
-    console.log(`wait await`);
-
     await updateMainData();
+    if (tag.classList.contains(`active`)) parentCLear([sectionContent]);
     sectionBarRender(projectId);
-    parentCLear([sectionContent]);
     return true;
 }
 
@@ -505,5 +484,6 @@ function contentRender(sectionId) {
     data.forEach((content) => {
         html += `<li class="contentItem" data-content-id="${content.id}" >${content.html}</li>`;
     });
+    html += `<li class="contentItem add"  >add</li>`;
     sectionContent.innerHTML = html;
 }

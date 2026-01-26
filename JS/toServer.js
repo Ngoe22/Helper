@@ -9,7 +9,6 @@ async function getData(id) {
         const data = await response.json();
 
         // console.log(`Chi tiết bài ${id}:`, data);
-        console.log(`done`);
         return data;
     } catch (error) {
         console.error("Lỗi:", error);
@@ -30,8 +29,10 @@ async function postData(data) {
         const newPost = await response.json();
         console.log("Đã tạo thành công:", newPost);
         return newPost;
+        // return newPost;
     } catch (error) {
         console.error("Lỗi khi tạo:", error);
+        return false;
     }
 }
 
@@ -73,4 +74,3 @@ async function updateData(id, data) {
         return false;
     }
 }
-
