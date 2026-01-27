@@ -190,7 +190,8 @@ body {
 .project-item.add,
 .section-item,
 .section-item.add,
-.project-pinItem {
+.project-pinItem,
+.contentItem.add {
     cursor: pointer;
 }
 

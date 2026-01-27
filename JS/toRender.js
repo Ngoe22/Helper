@@ -401,6 +401,7 @@ function projectListRender() {
 async function deleteProject(tag) {
     const id = tag.getAttribute(`data-project-id`);
     const result = await deleteData(id);
+    if (result) return console.log(`delete fail`);
     closePin(tag);
     await updateMainData();
     projectListRender();
@@ -487,3 +488,5 @@ function contentRender(sectionId) {
     html += `<li class="contentItem add"  >add</li>`;
     sectionContent.innerHTML = html;
 }
+
+
