@@ -241,7 +241,7 @@ function addInputTag(parentTag, submitCb) {
         addInputTag.inputTag = makeANode({
             tagName: `div`,
             initClass: `getTempText`,
-            innerHtml: `<input  type="text"><button class="submit" >V</button><button class="close" >X</button>`,
+            innerHtml: `<input  type="text"><button class="submit" ></button><button class="close" ></button>`,
         });
         addInputTag.inputText = addInputTag.inputTag.querySelector(`input`);
         addInputTag.onClose = () => {
@@ -439,7 +439,7 @@ function addToPin(tag) {
         const tagText = tag.querySelector(`.text`).textContent;
         projectPinBar.insertAdjacentHTML(
             `beforeend`,
-            `<li class="project-pinItem active" data-project-id="${id}" > <span class="text">${tagText}</span> <button class="project-pinCancel" >X</button></li>`,
+            `<li class="project-pinItem active" data-project-id="${id}" > <span class="text">${tagText}</span> <button class="project-pinCancel close" ></button></li>`,
         );
     } else {
         if (isExisted.classList.contains(`active`)) return;

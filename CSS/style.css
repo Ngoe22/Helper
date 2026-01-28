@@ -272,23 +272,31 @@ body {
     padding: 0 0 5px;
     border-bottom: 1px solid rgb(239, 239, 255);
     margin-bottom: 10px;
+    width: 100%;
 }
-.project-item.add::after {
+/* .project-item.add::after {
     content: "";
     height: 25px;
     width: 25px;
     background-image: url(../Assets/Icons/add.svg);
     background-repeat: no-repeat;
     background-size: contain;
+} */
+
+.submit,
+.close,
+.edit,
+.destroy,
+.add {
+    height: 25px;
+    width: 25px;
+    cursor: pointer;
 }
 
 .project-item {
     display: flex;
     align-items: center;
 }
-
-
-
 
 /* 
 const projectListBtn = document.querySelector(`.project-list-btn`);
