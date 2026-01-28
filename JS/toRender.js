@@ -67,6 +67,17 @@ sectionBar.onclick = (e) => {
     }
 };
 
+contentBoard.onclick = (e) => {
+    console.log(`meow`);
+
+    const node = e.target;
+    if (node.classList.contains(`add`)) {
+        contentAdd(node);
+        return;
+    }
+    const parent = e.target.closest(`.content-card`);
+};
+
 // ---------------------------- minor function  ----------------------------
 
 function arrayDelete(array, deleteValue) {
@@ -127,17 +138,16 @@ function dataQuery(root, paths) {
 function querySelectorByText(parent = document, selector, text) {
     const elements = parent.querySelectorAll(selector);
     return Array.from(elements).find((element) => {
-        return element.textContent.trim().includes(text);
+        return element.textContent.trim() === text;
     });
 }
 
 function makeID() {
-    return String(Math.floor(Math.random() * 10000)) + `-` + Date.now();
+    return Date.now() + `-` + String(Math.floor(Math.random() * 10000));
 }
 
 function getActiveProject(atr = false) {
     const node = projectPinBar.querySelector(`.project-pinItem.active`);
-
     if (!node) return false;
     return atr === `id` ? node.getAttribute(`data-project-id`) : node;
 }
@@ -162,7 +172,7 @@ function getSectionSource(projectId, sectionId) {
         {
             key: `id`,
             value: projectId,
-            objPath: [`page`],
+            objPath: [`pageData`],
         },
         {
             key: `id`,
@@ -176,7 +186,7 @@ function getSectionSourceList(projectId) {
         {
             key: `id`,
             value: projectId,
-            objPath: [`page`],
+            objPath: [`pageData`],
         },
     ]);
 }
@@ -185,12 +195,7 @@ function getContentSourceList(projectId, sectionId) {
         {
             key: `id`,
             value: projectId,
-            objPath: [`page`],
-        },
-        {
-            key: `id`,
-            value: sectionId,
-            objPath: [`content`],
+            objPath: [`pageData`, sectionId, `contentData`],
         },
     ]);
 }
@@ -281,23 +286,26 @@ function editTagName(tag, type = ``) {
 
     async function editTagNameCallBack(inputTag) {
         const id = tag.getAttribute(`data-${type}-id`);
-        const newName = inputTag.querySelector(`input`).value;
+        const newName = inputTag.querySelector(`input`).value.trim();
         const oldName = tag.querySelector(`.text`).textContent;
-        const dulRange =
-            type === `project`
-                ? testingList
-                : getSectionSourceList(getActiveProject(`id`));
+
         if (newName === oldName) return true;
-        if (
-            waterFallOfIf(
-                [
-                    newName === ``,
-                    checkDulNameInList(dulRange, oldName, newName),
-                ],
-                [`empty`, `it is dul`],
-            )
-        )
+        if (newName === ``) {
+            console.log(`empty bro`);
             return false;
+        }
+        if (
+            querySelectorByText(
+                type === `section` ? sectionBar : projectList,
+                `[data-${type}-id] .text`,
+                newName,
+            )
+        ) {
+            console.log(`dul bro`);
+            return false;
+        }
+
+        //
         return (result =
             type === `project`
                 ? await projectUpdateToServer(id, newName)
@@ -317,10 +325,8 @@ async function projectUpdateToServer(id, newName) {
 async function sectionUpdateToServer(id, newName) {
     const projectId = getActiveProject(`id`);
     const clone = structuredClone(getSectionSourceList(projectId));
-    for (let i of clone) {
-        if (i.id === id) i.name = newName;
-    }
-    if (!(await updateData(projectId, { page: clone }))) return false;
+    clone[id].name = newName;
+    if (!(await updateData(projectId, { pageData: clone }))) return false;
     updateMainData();
     editTextOfTag(sectionBar, `[data-section-id="${id}"] .text`, newName);
     return true;
@@ -335,17 +341,22 @@ function addTag(tag, type = ``) {
         // xu ly xss
         // project
         const newName = inputTag.querySelector(`input`).value.trim();
-        const dulRange =
-            type === `project`
-                ? testingList
-                : getSectionSourceList(getActiveProject(`id`));
-        if (
-            waterFallOfIf(
-                [newName === ``, checkDulNameInList(dulRange, ``, newName)],
-                [`empty`, `it is dul`],
-            )
-        )
+        if (newName === ``) {
+            console.log(`empty bro`);
             return false;
+        }
+        if (
+            querySelectorByText(
+                type === `section` ? sectionBar : projectList,
+                `[data-${type}-id] .text`,
+                newName,
+            )
+        ) {
+            console.log(`dul bro`);
+            return false;
+        }
+        // return false;
+        //
         return (result =
             type === `project`
                 ? await addProjectToServer(newName)
@@ -354,46 +365,55 @@ function addTag(tag, type = ``) {
     addInputTag(tag, addTagCallBack);
 }
 async function addProjectToServer(newName) {
+    const parentId = makeID();
     const results = await postData({
         name: newName,
-        page: [],
+        csId: parentId,
+        pageData: {},
     });
     if (!results.id) return false;
     updateMainData();
     projectList.insertAdjacentHTML(
         `beforeend`,
-        `<li class="project-item" data-project-id="${results.id}"><span class="text">${newName}</span><button class="edit">E</button><button class="destroy">D</button></li>`,
+        `<li class="project-item" data-project-id="${results.id}"><span class="text">${newName}</span><button class="edit"></button><button class="destroy"></button></li>`,
     );
     return true;
 }
 async function addSectionToServer(newName) {
     const newId = makeID();
     const projectId = getActiveProject(`id`);
+
     const clone = structuredClone(getSectionSourceList(projectId));
-    clone.push({
+
+    // return true;
+    clone[newId] = {
         name: newName,
         id: newId,
-        content: [],
-    });
-    const result = await updateData(projectId, { page: clone });
+        contentData: {},
+    };
+
+    console.log(clone);
+    // return true;
+    const result = await updateData(projectId, { pageData: clone });
     if (!result) return false;
     await updateMainData();
     sectionBar.insertAdjacentHTML(
         `beforeend`,
         `<li class="section-item" data-section-id="${newId}"><span class="text">${newName}</span><button class="edit">E</button><button class="destroy">D</button></li>`,
     );
+
     return true;
 }
 
 // project list
 
 function projectListRender() {
-    projectList.innerHTML = `<li class="project-item add">add</li>`;
+    projectList.innerHTML = `<li class="project-item add"></li>`;
     testingList.forEach((value) => {
         //
         projectList.insertAdjacentHTML(
             `beforeend`,
-            `<li class="project-item" data-project-id = "${value.id}"><span class="text">${value.name}</span><button class="edit">E</button><button class="destroy">D</button></li>`,
+            `<li class="project-item" data-project-id = "${value.id}"><span class="text">${value.name}</span><button class="edit"></button><button class="destroy"></button></li>`,
         );
     });
 }
@@ -401,7 +421,7 @@ function projectListRender() {
 async function deleteProject(tag) {
     const id = tag.getAttribute(`data-project-id`);
     const result = await deleteData(id);
-    if (result) return console.log(`delete fail`);
+    if (!result) return console.log(`delete fail`);
     closePin(tag);
     await updateMainData();
     projectListRender();
@@ -426,7 +446,7 @@ function addToPin(tag) {
         clearActive(projectPinBar);
         isExisted.classList.add(`active`);
     }
-    parentCLear([sectionContent]);
+    parentCLear([contentBoard]);
     sectionBarRender(id);
 }
 
@@ -435,7 +455,7 @@ function closePin(tag) {
     closeNode = projectPinBar.querySelector(`[data-project-id="${id}"]`);
     if (!closeNode) return;
     if (closeNode.classList.contains(`active`)) {
-        parentCLear([sectionBar, sectionContent]);
+        parentCLear([sectionBar, contentBoard]);
     }
     closeNode.remove();
     closeNode = null;
@@ -444,14 +464,12 @@ function closePin(tag) {
 // section
 
 function sectionBarRender(projectId) {
-    console.log(`inside sectionBarRender`);
-
-    const list = getSectionSourceList(projectId);
+    const list = Object.entries(getSectionSourceList(projectId));
     // render
-    let html = `<li class="section-item add">add</li>`;
+    let html = `<li class="section-item add"></li>`;
     if (list) {
-        for (let i of list) {
-            html += `<li class="section-item" data-section-id="${i.id}" ><span class="text">${i.name}</span><button class="edit">E</button><button class="destroy">D</button></li>`;
+        for (let [key, value] of list) {
+            html += `<li class="section-item" data-section-id="${value.id}" ><span class="text">${value.name}</span><button class="edit"></button><button class="destroy"></button></li>`;
         }
     }
     sectionBar.innerHTML = html;
@@ -469,10 +487,11 @@ async function deleteSection(tag) {
     const projectId = getActiveProject(`id`);
     // send delete on server
     const clone = structuredClone(getSectionSourceList(projectId));
-    deleteArrayElById(clone, id);
-    if (!(await updateData(projectId, { page: clone }))) return false;
+    delete clone[id];
+    // deleteArrayElById(clone, id);
+    if (!(await updateData(projectId, { pageData: clone }))) return false;
     await updateMainData();
-    if (tag.classList.contains(`active`)) parentCLear([sectionContent]);
+    if (tag.classList.contains(`active`)) parentCLear([contentBoard]);
     sectionBarRender(projectId);
     return true;
 }
@@ -480,11 +499,30 @@ async function deleteSection(tag) {
 // content
 function contentRender(sectionId) {
     const projectId = getActiveProject(`id`);
-    const data = getContentSourceList(projectId, sectionId);
+    const data = Array.from(getContentSourceList(projectId, sectionId));
+
     let html = ``;
     data.forEach((content) => {
         html += `<li class="contentItem" data-content-id="${content.id}" >${content.html}</li>`;
     });
     html += `<li class="contentItem add"  >add</li>`;
-    sectionContent.innerHTML = html;
+    contentBoard.innerHTML = html;
+}
+
+function contentAdd(node) {
+    contentBoard.insertAdjacentHTML(
+        `beforeend`,
+        `
+        <div class="content-card">
+            <div class="card-head">
+                <div class="card-title"></div>
+                <div class="card-btns">
+                    <button class="card-btn edit-title"></button>
+                    <button class="card-btn edit-title"></button>
+                </div>
+            </div>
+            <div class="card-body">meow</div>
+        </div>
+        `,
+    );
 }

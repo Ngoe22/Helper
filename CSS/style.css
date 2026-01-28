@@ -130,7 +130,12 @@ table {
 
 /* ----------------------------  start ---------------------------- */
 
+html {
+    font-size: 62.5%;
+}
+
 body {
+    font-size: clamp(1.6rem, 3.5714vw - 1.1429rem, 2.2rem);
     font-family: "Noto Sans SC", sans-serif;
     min-height: 100vh;
 }
@@ -182,7 +187,7 @@ body {
     padding: 5px 5px 8px;
 }
 
-.section-content {
+.content-board {
     padding: 5px;
 }
 
@@ -191,7 +196,8 @@ body {
 .section-item,
 .section-item.add,
 .project-pinItem,
-.contentItem.add {
+.contentItem.add,
+.project-list-btn {
     cursor: pointer;
 }
 
@@ -204,7 +210,7 @@ body {
 
 .project-list {
     position: absolute;
-    top: 20px;
+    top: 30px;
     left: -15px;
     background: white;
     width: max-content;
@@ -219,7 +225,6 @@ body {
     padding: 5px 0;
     display: flex;
     justify-content: center;
-    min-width: 100px;
 }
 
 .getTempText {
@@ -240,6 +245,51 @@ body {
     cursor: pointer;
 }
 
+/* real css */
+
+.h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.project-list-btn {
+    font-size: 1.6rem;
+    font-weight: 500;
+    background-color: transparent;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    box-shadow: -1px 1px 2px 2px rgba(0, 0, 0, 0.2);
+}
+.project-list {
+    box-shadow: -1px 1px 2px 2px rgba(0, 0, 0, 0.2);
+    min-width: 250px;
+}
+
+.project-item.add {
+    padding: 0 0 5px;
+    border-bottom: 1px solid rgb(239, 239, 255);
+    margin-bottom: 10px;
+}
+.project-item.add::after {
+    content: "";
+    height: 25px;
+    width: 25px;
+    background-image: url(../Assets/Icons/add.svg);
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.project-item {
+    display: flex;
+    align-items: center;
+}
+
+
+
+
 /* 
 const projectListBtn = document.querySelector(`.project-list-btn`);
 const projectList = document.querySelector(`.project-list`);
@@ -247,7 +297,7 @@ const projectListWrap = document.querySelector(`.project-list-wrap`);
 const projectPinBar = document.querySelector(`.project-pinList`);
 const tools = document.querySelector(`.tools`);
 const sectionBar = document.querySelector(`.section-list`);
-const sectionContent = document.querySelector(`.section-content`);
+const sectionContent = document.querySelector(`.content-board`);
 */
 
 /* 

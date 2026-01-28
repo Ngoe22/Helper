@@ -18,7 +18,7 @@ const projectListWrap = document.querySelector(`.project-list-wrap`);
 const projectPinBar = document.querySelector(`.project-pinList`);
 const tools = document.querySelector(`.tools`);
 const sectionBar = document.querySelector(`.section-list`);
-const sectionContent = document.querySelector(`.section-content`);
+const contentBoard = document.querySelector(`.content-board`);
 
 // console.log(testingList);
 let testingList = [];

@@ -401,9 +401,9 @@ function projectListRender() {
 async function deleteProject(tag) {
     const id = tag.getAttribute(`data-project-id`);
     const result = await deleteData(id);
-    if (result) return console.log(`delete fail`);
-    closePin(tag);
+    if (!result) return console.log(`delete fail`);
     await updateMainData();
+    closePin(tag);
     projectListRender();
 }
 
