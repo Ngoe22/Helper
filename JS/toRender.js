@@ -250,14 +250,14 @@ function addInputTag(parentTag, submitCb) {
             inputTag.classList.remove(`none-touch`);
         };
     }
-    const [inputTag] = [addInputTag.inputTag];
+    const [inputTag, inputText] = [addInputTag.inputTag, addInputTag.inputText];
 
     // add init value
     const defaultText = parentTag.querySelector(`.text`);
     if (defaultText)
         inputTag.querySelector(`input`).value = defaultText.textContent;
     parentTag.append(inputTag);
-
+    inputText.focus();
     inputTag.onclick = (e) => {
         e.stopPropagation();
         const cl = e.target.classList;
