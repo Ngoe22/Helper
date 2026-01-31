@@ -6,6 +6,10 @@
 projectListBtn.onclick = (e) => {
     e.stopPropagation();
     projectList.classList.toggle(`hide`);
+    if (addInputTag.inputTag) {
+        addInputTag.inputTag.remove();
+        addInputTag.inputText.value = ``;
+    }
 };
 
 projectList.onclick = (e) => {
@@ -50,16 +54,25 @@ projectPinBar.onclick = (e) => {
 // sections
 sectionBar.onclick = (e) => {
     const parent = e.target.closest(`.section-item`);
+    const node = e.target;
     if (!parent) return;
     e.stopPropagation();
     const eClassList = e.target.classList;
-    if (parent.classList.contains(`add`)) {
+
+    // if (node.classList.contains(`hide-section`)) {
+    //     sectionBar.classList.toggle(`hide-mode`);
+    // } else
+
+    if (node.classList.contains(`add`)) {
         addTag(parent, `section`);
+    } else if (parent.classList.contains(`head`)) {
+        return;
     } else if (
         eClassList.contains(`section-item`) ||
         eClassList.contains(`text`)
     ) {
         sectionActive(parent);
+        renderContent();
     } else if (eClassList.contains(`edit`)) {
         editTagName(parent, `section`);
     } else if (eClassList.contains(`destroy`)) {
@@ -71,11 +84,23 @@ contentBoard.onclick = (e) => {
     console.log(`meow`);
 
     const node = e.target;
-    if (node.classList.contains(`add`)) {
-        contentAdd(node);
-        return;
+    const list = node.classList;
+    const contentCard = node.closest(`.content-card`);
+    if (list.contains(`add-a-QA`)) {
+        contentAddQA(node);
+    } else if (list.contains(`edit-yellow`)) {
+        getNewNameForContentCard(contentCard);
+    } else if (list.contains(`destroy-red`)) {
+        deleteContentCard(contentCard);
+    } else if (list.contains(`QA-add-new-row`)) {
+        addContentQARow(contentCard);
+    } else if (list.contains(`QA-row-edit`)) {
+        const row = node.closest(`.QA-row`);
+        getInputToEditContentQA(contentCard, row);
     }
-    const parent = e.target.closest(`.content-card`);
+
+    //
+    //
 };
 
 // ---------------------------- minor function  ----------------------------
@@ -153,6 +178,7 @@ function getActiveProject(atr = false) {
 }
 function getActiveSection(atr = false) {
     const node = sectionBar.querySelector(`.section-item.active`);
+    if (!node) return false;
     return atr === `id` ? node.getAttribute(`data-section-id`) : node;
 }
 
@@ -399,7 +425,7 @@ async function addSectionToServer(newName) {
     await updateMainData();
     sectionBar.insertAdjacentHTML(
         `beforeend`,
-        `<li class="section-item" data-section-id="${newId}"><span class="text">${newName}</span><button class="edit">E</button><button class="destroy">D</button></li>`,
+        `<li class="section-item" data-section-id="${newId}"><span class="text">${newName}</span><button class="edit"></button><button class="destroy"></button></li>`,
     );
 
     return true;
@@ -439,7 +465,7 @@ function addToPin(tag) {
         const tagText = tag.querySelector(`.text`).textContent;
         projectPinBar.insertAdjacentHTML(
             `beforeend`,
-            `<li class="project-pinItem active" data-project-id="${id}" > <span class="text">${tagText}</span> <button class="project-pinCancel close" ></button></li>`,
+            `<li class="project-pinItem active" data-project-id="${id}" > <span class="text">${tagText}</span> <button class="project-pinCancel unpin" ></button></li>`,
         );
     } else {
         if (isExisted.classList.contains(`active`)) return;
@@ -466,7 +492,11 @@ function closePin(tag) {
 function sectionBarRender(projectId) {
     const list = Object.entries(getSectionSourceList(projectId));
     // render
-    let html = `<li class="section-item add"></li>`;
+    // <button class="hide-section" ></button>
+    let html = `
+    <li class="section-item head">  
+    <button class="add" ></button>
+    </li>`;
     if (list) {
         for (let [key, value] of list) {
             html += `<li class="section-item" data-section-id="${value.id}" ><span class="text">${value.name}</span><button class="edit"></button><button class="destroy"></button></li>`;
@@ -479,7 +509,6 @@ function sectionActive(tag) {
     if (tag.classList.contains(`add`)) return;
     clearActive(sectionBar);
     tag.classList.add(`active`);
-    contentRender(tag.getAttribute(`data-section-id`));
 }
 
 async function deleteSection(tag) {
@@ -497,32 +526,219 @@ async function deleteSection(tag) {
 }
 
 // content
-function contentRender(sectionId) {
-    const projectId = getActiveProject(`id`);
-    const data = Array.from(getContentSourceList(projectId, sectionId));
+// function contentRender(sectionId) {
+//     const projectId = getActiveProject(`id`);
+//     const data = Array.from(getContentSourceList(projectId, sectionId));
 
-    let html = ``;
-    data.forEach((content) => {
-        html += `<li class="contentItem" data-content-id="${content.id}" >${content.html}</li>`;
+//     let html = ``;
+//     // data.forEach((content) => {
+//     //     html += `<div class="contentItem" data-content-id="${content.id}" >${content.html}</div>`;
+//     // });
+//     html += `
+//     <div class="tools">
+//         <div class="tool add-a-QA">QA</div>
+//         <div class="tool work-flow">WF</div>
+//     </div>`;
+//     contentBoard.innerHTML = html;
+// }
+
+function getNewNameForContentCard(card) {
+    if (!card) return;
+    const nameNode = card.querySelector(`.card-name`);
+    if (!nameNode) return;
+
+    const inputForContent = makeANode({
+        tagName: `div`,
+        initClass: `inputForContent`,
+        innerHtml: `<input  type="text"><button class="submit" ></button><button class="close" ></button>`,
     });
-    html += `<li class="contentItem add"  >add</li>`;
+
+    const inputTag = inputForContent.querySelector(`input`);
+    nameNode.replaceWith(inputForContent);
+    inputTag.value = nameNode.textContent;
+    inputTag.focus();
+
+    inputForContent.onclick = (e) => {
+        const list = e.target.classList;
+
+        if (list.contains(`close`)) {
+            inputForContent.replaceWith(nameNode);
+        } else if (list.contains(`submit`)) {
+            editContentCard(card, nameNode, inputTag.value);
+            inputForContent.replaceWith(nameNode);
+        }
+    };
+}
+
+async function editContentCard(card, nameNode, newName) {
+    const id = card.getAttribute(`data-content-id`);
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const clone = structuredClone(getSectionSourceList(projectId));
+    clone[sectionId].contentData[id].name = newName;
+    await updateData(projectId, { pageData: clone });
+    await updateMainData();
+    nameNode.textContent = newName;
+}
+
+async function deleteContentCard(card) {
+    console.log(card);
+
+    const id = card.getAttribute(`data-content-id`);
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const clone = structuredClone(getSectionSourceList(projectId));
+    delete clone[sectionId].contentData[id];
+    await updateData(projectId, { pageData: clone });
+    await updateMainData();
+    card.remove();
+}
+
+//
+async function contentAddQA(node) {
+    //
+
+    const newId = makeID();
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const clone = structuredClone(getSectionSourceList(projectId));
+
+    // ================================
+    //
+    clone[sectionId].contentData[newId] = {
+        name: `newQA`,
+        id: newId,
+        type: `QA`,
+        rows: {},
+    };
+    await updateData(projectId, { pageData: clone });
+    await updateMainData();
+    renderContent();
+}
+
+function renderContent() {
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const source = Object.entries(
+        getProjectSource(projectId).pageData[sectionId].contentData,
+    );
+    // console.log(source);
+    let html = ``;
+    correspondFunc = {
+        QA: renderContentQA,
+    };
+    for (let [key, value] of source) {
+        console.log(value.name, value.id, value.type);
+
+        html += `<div class="content-card" data-content-id = "${value.id}" data-content-type = "${value.type}"  >
+            <div class="content-card-head">
+                <div class="card-name">${value.name}</div>
+                <div class="card-btns">
+                    <button class="card-btn edit-yellow"></button>
+                    <button class="card-btn destroy-red"></button>
+                </div>
+            </div>
+            <div class="card-body">
+
+                ${correspondFunc[value.type](value.rows)} 
+
+                
+            </div>
+        </div>`;
+    }
+    html += `        
+    <div class="tools">
+        <div class="tool add-a-QA">QA</div>
+        <div class="tool work-flow">WF</div>
+    </div>`;
     contentBoard.innerHTML = html;
 }
 
-function contentAdd(node) {
-    contentBoard.insertAdjacentHTML(
-        `beforeend`,
-        `
-        <div class="content-card">
-            <div class="card-head">
-                <div class="card-title"></div>
-                <div class="card-btns">
-                    <button class="card-btn edit-title"></button>
-                    <button class="card-btn edit-title"></button>
-                </div>
+// QA part
+
+function renderContentQA(obj) {
+    const list = Object.entries(obj);
+    let html = ``;
+    for (let [key, QA] of list) {
+        console.log(key, QA);
+        html += `<div class="QA-row"   data-qa-row-id = "${key}">
+            <div class="QA-Q">${QA[0]}</div>
+            <div class="QA-A">${QA[1]}</div>
+            <div class="QA-btns">
+                <button class="QA-btn QA-row-edit edit"></button>
+                <button class="QA-btn QA-row-destroy destroy"></button>
             </div>
-            <div class="card-body">meow</div>
+        </div>`;
+    }
+    // lop obj => add to html
+    return `<div class="QA-card">
+                <div class="QA-body">${html}</div>
+                <div class="QA-add-new-row"></div>
+            </div>`;
+}
+
+async function addContentQARow(contentCard) {
+    const newRowId = makeID();
+    const contentId = contentCard.getAttribute(`data-content-id`);
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const clone = getSectionSourceList(projectId);
+    clone[sectionId].contentData[contentId].rows[newRowId] = [`Q`, `A`];
+
+    await updateData(projectId, { pageData: clone });
+    contentCard.querySelector(`.QA-body`).insertAdjacentHTML(
+        `beforeend`,
+        `<div class="QA-row"   data-qa-row-id = "${newRowId}">
+            <div class="QA-Q">A</div>
+            <div class="QA-A">Q</div>
+            <div class="QA-btns">
+                <button class="QA-btn edit"></button>
+                <button class="QA-btn destroy"></button>
+            </div>
+        </div>`,
+    );
+    await updateMainData();
+}
+
+const getQA = makeANode({
+    tagName: `div`,
+    initClass: `tempToGetQA`,
+    innerHtml: `
+        <div class="tempToGetQA-Q" contenteditable="true"></div>
+        <div  class="tempToGetQA-A" contenteditable="true"></div>
+        <div class="tempToGetQA-btns">
+            <button class="submit"></button>
+            <button class="close"></button>
         </div>
         `,
-    );
+});
+
+function getInputToEditContentQA(contentCard, row) {
+    const Q = row.querySelector(`.QA-Q`);
+    const A = row.querySelector(`.QA-A`);
+    row.replaceWith(getQA);
+
+    const inputQ = getQA.querySelector(`.tempToGetQA-Q`);
+    const inputA = getQA.querySelector(`.tempToGetQA-A`);
+    inputQ.textContent = Q.textContent;
+    inputA.textContent = A.textContent;
+
+    getQA.onclick = (e) => {
+        const list = e.target.classList;
+        if (list.contains(`submit`)) {
+            Q.textContent = inputQ.innerText;
+            A.textContent = inputA.innerText;
+            getQA.replaceWith(row);
+        } else if (list.contains(`close`)) {
+            getQA.replaceWith(row);
+        }
+    };
 }
+
+function editContentQA(contentCard, row) {
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const rowId = row.getAttribute(`data-qa-row-id`);
+}
+
+function deleteContentQA() {}
