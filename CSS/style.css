@@ -642,6 +642,7 @@ body {
 
 .QA-A {
     white-space: pre-line;
+    line-height: 1.5;
 }
 .QA-A,
 .tempToGetQA-A {
