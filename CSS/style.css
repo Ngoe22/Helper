@@ -205,6 +205,52 @@ body {
     transform: translateX(0);
 }
 
+.confirm-modal {
+    position: fixed;
+    inset: 0 0 0 0;
+    background-color: rgba(0, 0, 0, 0.2);
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-modal-box {
+    padding: 20px;
+    border-radius: 5px;
+    max-width: 95%;
+    background-color: white;
+    display: flex;
+    justify-content: right;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.confirm-modal-message {
+    font-weight: 600;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.confirm-modal-ok,
+.confirm-modal-cancel {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.6rem;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: -1px 1px 2px 1px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+.confirm-modal-ok {
+    background-color: rgb(106, 212, 122);
+}
+.confirm-modal-cancel {
+    background-color: rgb(238, 82, 82);
+}
+
 /* ----------------------------  common ---------------------------- */
 
 .main-wrapper {
@@ -608,7 +654,7 @@ body {
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    opacity: 0.7;
+    opacity: 0.5;
     transition: 0.5s;
 }
 .destroy-red:hover,
@@ -637,7 +683,7 @@ body {
 .QA-Q,
 .tempToGetQA-Q {
     padding: 5px 10px;
-    width: 30%;
+    width: 25%;
 }
 
 .QA-A {

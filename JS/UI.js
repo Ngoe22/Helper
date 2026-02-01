@@ -22,3 +22,33 @@ function mainNotification(text, color) {
         mainNotificationNode.remove();
     }, 4000);
 }
+
+function askConfirm(message) {
+    return new Promise((resolve) => {
+        const modal = document.createElement("div");
+        modal.className = "confirm-modal";
+        modal.innerHTML = `
+            <div class="confirm-modal-box">
+                <p class = "confirm-modal-message" >${message}</p>
+                <button class="confirm-modal-cancel">Noooo !</button>
+                <button class="confirm-modal-ok">OK</button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        modal.querySelector(".confirm-modal-ok").onclick = () => {
+            cleanup();
+            resolve(true);
+        };
+
+        modal.querySelector(".confirm-modal-cancel").onclick = () => {
+            cleanup();
+            resolve(false);
+        };
+
+        function cleanup() {
+            modal.remove();
+        }
+    });
+}

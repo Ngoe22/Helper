@@ -445,6 +445,9 @@ function projectListRender() {
 }
 
 async function deleteProject(tag) {
+    const ok = await askConfirm("Sure to delete this ?");
+    if (!ok) return;
+
     const id = tag.getAttribute(`data-project-id`);
     const result = await deleteData(id);
     if (!result) return console.log(`delete fail`);
@@ -512,6 +515,9 @@ function sectionActive(tag) {
 }
 
 async function deleteSection(tag) {
+    const ok = await askConfirm("Sure to delete this ?");
+    if (!ok) return;
+
     const id = tag.getAttribute(`data-section-id`);
     const projectId = getActiveProject(`id`);
     // send delete on server
@@ -582,7 +588,8 @@ async function editContentCard(card, nameNode, newName) {
 }
 
 async function deleteContentCard(card) {
-    console.log(card);
+    const ok = await askConfirm("Sure to delete this ?");
+    if (!ok) return;
 
     const id = card.getAttribute(`data-content-id`);
     const projectId = getActiveProject(`id`);
@@ -738,6 +745,8 @@ function getInputToEditContentQA(contentCard, row) {
 }
 
 async function deleteContentQA(contentCard, row) {
+    const ok = await askConfirm("Sure to delete this ?");
+    if (!ok) return;
     const projectId = getActiveProject(`id`);
     const sectionId = getActiveSection(`id`);
     const contentId = contentCard.getAttribute(`data-content-id`);
