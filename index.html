@@ -11,10 +11,24 @@
             rel="stylesheet"
         />
         <link rel="stylesheet" href="./CSS/style.css" />
+        <link rel="stylesheet" href="./CSS/contents/QA.css" />
+        <link rel="stylesheet" href="./CSS/contents/toDo.css" />
     </head>
     <body>
         <div class="main-wrapper">
-            <button onclick="console.log(testingList)">show testingList</button>
+            <input type="date" />
+            <div class="header">
+                <button onclick="console.log(testingList)">
+                    show testingList
+                </button>
+                <div class="time-block">
+                    <div id="clock"></div>
+                    <div class="timezone-board">
+                        <button class="timezone-btn">time zone</button>
+                        <div class="timezone-list hide"></div>
+                    </div>
+                </div>
+            </div>
             <h1 class="h1">on Developing</h1>
             <div class="project-wrap">
                 <div class="project-bar">
@@ -38,7 +52,7 @@
                 </div>
             </div>
         </div>
-
+        
         <!-- JS -->
 
         <script src="./JS/toServer.js"></script>

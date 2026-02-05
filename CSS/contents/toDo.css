@@ -1,0 +1,78 @@
+.toDo-row {
+    padding: 10px 8px;
+}
+
+.toDo-row:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.toDo-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed rgba(59, 59, 59, 0.4);
+    margin-bottom: 10px;
+}
+
+.toDo-btns {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toDo-QA {
+    display: flex;
+    gap: 10px;
+}
+
+.toDo-Q {
+    width: 20%;
+}
+.toDo-A {
+    flex-grow: 1;
+}
+
+.toDo-add-new-row {
+    /* height: 20px; */
+    padding: 5px 10px;
+    border: 1px rgba(128, 128, 128, 0.5);
+    border-spacing: 300px;
+    border-style: dashed;
+    cursor: pointer;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+.toDo-add-new-row::after {
+    content: "";
+    display: block;
+    height: 25px;
+    width: 25px;
+    margin: auto;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-image: url(../../assets/icons/file-circle-plus-solid.svg);
+    opacity: 0.5;
+}
+
+.tempToGetToDo {
+    display: flex;
+}
+.tempToGetToDo-Q {
+    width: 20%;
+    background-color: rgba(60, 255, 0, 0.2);
+}
+.tempToGetToDo-A {
+    flex-grow: 1;
+    background-color: rgba(255, 255, 0, 0.2);
+}
+
+.tempToGetToDo-btns {
+    padding: 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-color: rgba(250, 43, 43, 0.2);
+}

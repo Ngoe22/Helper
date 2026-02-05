@@ -185,7 +185,8 @@ body {
 .mainNotificationNode {
     padding: 10px 20px;
     box-shadow: -2px 2px 3px 1px rgba(0, 0, 0, 0.5);
-    position: absolute;
+    position: fixed;
+
     top: 40px;
     z-index: 20;
     font-weight: 600;
@@ -251,7 +252,19 @@ body {
     background-color: rgb(238, 82, 82);
 }
 
+input[type="date"] {
+    padding: 3px;
+    font-size: 14px;
+}
+
 /* ----------------------------  common ---------------------------- */
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+}
 
 .main-wrapper {
     width: min(1400px, 98vw);
@@ -669,104 +682,6 @@ body {
     background-color: rgb(255, 237, 44);
 }
 
-/* QA */
-.QA-row,
-.tempToGetQA {
-    display: flex;
-    overflow: auto;
-}
-
-.QA-row:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
-.QA-Q,
-.tempToGetQA-Q {
-    padding: 5px 10px;
-    width: 25%;
-}
-
-.QA-A {
-    white-space: pre-line;
-    line-height: 1.5;
-}
-.QA-A,
-.tempToGetQA-A {
-    padding: 5px 10px;
-    flex-grow: 1;
-}
-
-.QA-btns,
-.tempToGetQA-btns {
-    padding: 5px 10px;
-    display: flex;
-    gap: 10px;
-}
-
-.tempToGetQA-Q {
-    background-color: rgba(60, 255, 0, 0.2);
-}
-.tempToGetQA-A {
-    background-color: rgba(255, 255, 0, 0.2);
-}
-.tempToGetQA-btns {
-    background-color: rgba(250, 43, 43, 0.2);
-}
-
-.tempToGetQA-Q,
-.tempToGetQA-A {
-    min-height: 100px;
-}
-
-.tempToGetQA-Q:focus,
-.tempToGetQA-A:focus {
-    outline: none;
-}
-
-/*  */
-.QA-add-new-row {
-    /* height: 20px; */
-    padding: 5px 10px;
-    border: 1px rgba(128, 128, 128, 0.5);
-    border-spacing: 300px;
-    border-style: dashed;
-    cursor: pointer;
-    margin-top: 20px;
-    border-radius: 10px;
-}
-.QA-add-new-row::after {
-    content: "";
-    display: block;
-    height: 25px;
-    width: 25px;
-    margin: auto;
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-image: url(../assets/icons/file-circle-plus-solid.svg);
-    opacity: 0.5;
-}
-
-.inputForContent {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    height: 35px;
-    flex-grow: 1;
-    border-bottom: 1px solid gainsboro;
-}
-
-.inputForContent input {
-    border: 0;
-    height: calc(100% - 2px);
-    padding: 0 10px;
-    box-shadow: -1px 1px 2px 0px rgba(0, 0, 0, 0.2);
-}
-.inputForContent input:focus {
-    outline: none;
-    box-shadow: -1px 1px 2px 0px rgba(187, 103, 67, 0.5);
-}
-
 /* 
 const projectListBtn = document.querySelector(`.project-list-btn`);
 const projectList = document.querySelector(`.project-list`);
@@ -777,27 +692,69 @@ const sectionBar = document.querySelector(`.section-list`);
 const contentBoard = document.querySelector(`.content-board`);
 */
 
-/* 
 
-const currentActive = {
-    pinID: ``,
-    sectionID: ``,
-    pinList: [],
-};
+/* time zone */
 
+.time-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
 
-dataQuery(testingList, [
-    {
-        key: `name`,
-        value: `yewu2`,
-        objPath: [`page`],
-    },
-    {
-        key: `name`,
-        value: `page-2.2`,
-        objPath: [`content`],
-    },
-]);
+#clock {
+    font-weight: 600;
+    background-color: rgba(91, 95, 100, 0.802);
+    padding: 5px 10px 6px;
+    border-radius: 5px;
+    color: white;
+    box-shadow: -1px 1px 2px 2px rgba(0, 0, 0, 0.05);
+}
 
+.timezone-board {
+    position: relative;
+}
 
-*/
+.timezone-btn {
+    font-size: 1.6rem;
+    font-weight: 500;
+    background-color: transparent;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    box-shadow: -1px 1px 2px 2px rgba(0, 0, 0, 0.05);
+    transition: 0.4s;
+    cursor: pointer;
+}
+.timezone-btn:hover {
+    box-shadow: -1px 1px 2px 2px rgba(0, 0, 0, 0.2);
+}
+
+.timezone-list {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    z-index: 10;
+    width: max-content;
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: -1px 1px 2px 2px rgba(0, 0, 0, 0.2);
+}
+
+.timezone-item {
+    display: block;
+    padding: 5px;
+    cursor: pointer;
+}
+.timezone-item:has(:checked) {
+    background-color: rgb(245, 177, 177);
+    color: white;
+}
+
+.timezone-item:hover {
+    background-color: rgb(245, 177, 177);
+    color: white;
+    box-shadow: -1px 1px 2px 2px rgba(0, 0, 0, 0.2);
+}

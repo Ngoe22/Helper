@@ -86,6 +86,8 @@ contentBoard.onclick = (e) => {
     const contentCard = node.closest(`.content-card`);
     if (list.contains(`add-a-QA`)) {
         contentAddQA(node);
+    } else if (list.contains(`add-a-toDoList`)) {
+        contentAddToDo(node);
     } else if (list.contains(`edit-yellow`)) {
         getNewNameForContentCard(contentCard);
     } else if (list.contains(`destroy-red`)) {
@@ -97,6 +99,16 @@ contentBoard.onclick = (e) => {
         getInputToEditContentQA(contentCard, row);
     } else if (list.contains(`QA-row-destroy`)) {
         deleteContentQA(contentCard, node.closest(`.QA-row`));
+    } else if (list.contains(`toDo-add-new-row`)) {
+        // addContentTodoRow(contentCard);
+        addContentToDoRow(contentCard);
+    } else if (list.contains(`toDo-row-edit`)) {
+        const row = node.closest(`.toDo-row`);
+        // getInputToEditContentQA(contentCard, row);
+        getInputToEditContentQA(contentCard, row);
+    } else if (list.contains(`toDo-row-destroy`)) {
+        // deleteContentQA(contentCard, node.closest(`.QA-row`));
+        deleteContentToDo(contentCard, node.closest(`.toDo-row`));
     }
 
     //
@@ -601,25 +613,7 @@ async function deleteContentCard(card) {
     card.remove();
 }
 
-//
-async function contentAddQA(node) {
-    //
-    const newId = makeID();
-    const projectId = getActiveProject(`id`);
-    const sectionId = getActiveSection(`id`);
-    const clone = structuredClone(getSectionSourceList(projectId));
-    //
-
-    clone[sectionId].contentData[newId] = {
-        name: `newQA`,
-        id: newId,
-        type: `QA`,
-        rows: {},
-    };
-    await updateData(projectId, { pageData: clone });
-    await updateMainData();
-    renderContent();
-}
+// --------------------------------------------- content
 
 function renderContent() {
     const projectId = getActiveProject(`id`);
@@ -631,6 +625,7 @@ function renderContent() {
     let html = ``;
     correspondFunc = {
         QA: renderContentQA,
+        toDo: renderContentToDo,
     };
     for (let [key, value] of source) {
         html += `<div class="content-card" data-content-id = "${value.id}" data-content-type = "${value.type}"  >
@@ -650,11 +645,31 @@ function renderContent() {
     <div class="tools">
         <div class="tool add-a-QA">QA</div>
         <div class="tool work-flow">WF</div>
+        <div class="tool add-a-toDoList">toDo</div>
     </div>`;
     contentBoard.innerHTML = html;
 }
 
 // QA part
+
+async function contentAddQA(node) {
+    //
+    const newId = makeID();
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const clone = structuredClone(getSectionSourceList(projectId));
+    //
+
+    clone[sectionId].contentData[newId] = {
+        name: `newQA`,
+        id: newId,
+        type: `QA`,
+        rows: {},
+    };
+    await updateData(projectId, { pageData: clone });
+    await updateMainData();
+    renderContent();
+}
 
 function renderContentQA(obj) {
     const list = Object.entries(obj);
@@ -757,3 +772,257 @@ async function deleteContentQA(contentCard, row) {
     await updateMainData();
     renderContent();
 }
+
+// toDo list part
+
+async function contentAddToDo() {
+    //
+    const newId = makeID();
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const clone = structuredClone(getSectionSourceList(projectId));
+    //
+
+    clone[sectionId].contentData[newId] = {
+        name: `new toDoList`,
+        id: newId,
+        type: `toDo`,
+        rows: {},
+    };
+    await updateData(projectId, { pageData: clone });
+    await updateMainData();
+    renderContent();
+}
+
+function renderContentToDo(toDoList) {
+    const list = Object.entries(toDoList);
+    let html = ``;
+    for (let [key, QA] of list) {
+        html += `<div class="toDo-row" data-todo-row-id="${key}">
+            <div class="toDo-header">
+                <div class="toDo-due-time">
+                    <span class="text">due</span>
+                    <span class="time"></span>
+                </div>
+                <div class="toDo-btns">
+                    <button class="toDo-btn toDo-row-edit edit"></button>
+                    <button class="toDo-btn toDo-row-destroy destroy"></button>
+                </div>
+            </div>
+            <div class="toDo-QA">
+                <div class="toDo-Q">${QA[0]}</div>
+                <div class="toDo-A">${QA[1]}</div>
+            </div>
+        </div>`;
+    }
+    return `<div class="toDo-card">
+                <div class="toDo-body">${html}</div>
+                <div class="toDo-add-new-row"></div>
+            </div>`;
+}
+
+async function addContentToDoRow(contentCard) {
+    const newRowId = makeID();
+    const contentId = contentCard.getAttribute(`data-content-id`);
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const clone = getSectionSourceList(projectId);
+    clone[sectionId].contentData[contentId].rows[newRowId] = [
+        `title`,
+        `content`,
+    ];
+    await updateData(projectId, { pageData: clone });
+    await updateMainData();
+    renderContent();
+}
+
+async function deleteContentToDo(contentCard, row) {
+    const ok = await askConfirm("Sure to delete this ?");
+    if (!ok) return;
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const contentId = contentCard.getAttribute(`data-content-id`);
+    const rowId = row.getAttribute(`data-todo-row-id`);
+    const clone = getSectionSourceList(projectId);
+    delete clone[sectionId].contentData[contentId].rows[rowId];
+    await updateData(projectId, { pageData: clone });
+    await updateMainData();
+    renderContent();
+}
+
+const getToDo = makeANode({
+    tagName: `div`,
+    initClass: `tempToGetToDo`,
+    innerHtml: `
+        <textarea class="tempToGetToDo-Q" ></textarea>
+        <textarea  class="tempToGetToDo-A" ></textarea>
+        <div class="tempToGetToDo-btns">
+            <button class="submit"></button>
+            <button class="close"></button>
+        </div>
+        `,
+});
+function getInputToEditContentQA(contentCard, row) {
+    isInputOn = contentBoard.contains(getToDo);
+    if (isInputOn) {
+        getToDo.scrollIntoView({
+            behavior: "smooth",
+            block: "start", // start | center | end | nearest
+        });
+        getToDo.querySelector(`.tempToGetToDo-A`).focus();
+        mainNotification(`Finish what you are editing`, `red`);
+        return;
+    }
+
+    const Q = row.querySelector(`.toDo-Q`);
+    const A = row.querySelector(`.toDo-A`);
+    row.replaceWith(getToDo);
+
+    const inputQ = getToDo.querySelector(`.tempToGetToDo-Q`);
+    const inputA = getToDo.querySelector(`.tempToGetToDo-A`);
+
+    inputQ.value = Q.textContent;
+    inputA.value = A.textContent;
+
+    getToDo.onclick = async (e) => {
+        const list = e.target.classList;
+        if (list.contains(`submit`)) {
+            getToDo.replaceWith(row);
+            const projectId = getActiveProject(`id`);
+            const sectionId = getActiveSection(`id`);
+            const contentId = contentCard.getAttribute(`data-content-id`);
+            const rowId = row.getAttribute(`data-todo-row-id`);
+            const clone = getSectionSourceList(projectId);
+            clone[sectionId].contentData[contentId].rows[rowId] = [
+                inputQ.value,
+                inputA.value,
+            ];
+            await updateData(projectId, { pageData: clone });
+            await updateMainData();
+            renderContent();
+        } else if (list.contains(`close`)) {
+            getToDo.replaceWith(row);
+        }
+    };
+}
+
+// async function contentAddQA(node) {
+//     //
+//     const newId = makeID();
+//     const projectId = getActiveProject(`id`);
+//     const sectionId = getActiveSection(`id`);
+//     const clone = structuredClone(getSectionSourceList(projectId));
+//     //
+
+//     clone[sectionId].contentData[newId] = {
+//         name: `newQA`,
+//         id: newId,
+//         type: `QA`,
+//         rows: {},
+//     };
+//     await updateData(projectId, { pageData: clone });
+//     await updateMainData();
+//     renderContent();
+// }
+
+// function renderContentQA(obj) {
+//     const list = Object.entries(obj);
+//     let html = ``;
+//     for (let [key, QA] of list) {
+//         html += `<div class="QA-row"   data-qa-row-id = "${key}">
+//             <div class="QA-Q">${QA[0]}</div>
+//             <div class="QA-A">${QA[1]}</div>
+//             <div class="QA-btns">
+//                 <button class="QA-btn QA-row-edit edit"></button>
+//                 <button class="QA-btn QA-row-destroy destroy"></button>
+//             </div>
+//         </div>`;
+//     }
+//     // lop obj => add to html
+//     return `<div class="QA-card">
+//                 <div class="QA-body">${html}</div>
+//                 <div class="QA-add-new-row"></div>
+//             </div>`;
+// }
+
+// async function addContentQARow(contentCard) {
+//     const newRowId = makeID();
+//     const contentId = contentCard.getAttribute(`data-content-id`);
+//     const projectId = getActiveProject(`id`);
+//     const sectionId = getActiveSection(`id`);
+//     const clone = getSectionSourceList(projectId);
+//     clone[sectionId].contentData[contentId].rows[newRowId] = [`Q`, `A`];
+//     await updateData(projectId, { pageData: clone });
+//     await updateMainData();
+//     renderContent();
+// }
+
+// const getToDo = makeANode({
+//     tagName: `div`,
+//     initClass: `tempToGetToDo`,
+//     innerHtml: `
+//         <textarea class="tempToGetToDo-Q" ></textarea>
+//         <textarea  class="tempToGetToDo-A" ></textarea>
+//         <div class="tempToGetToDo-btns">
+//             <button class="submit"></button>
+//             <button class="close"></button>
+//         </div>
+//         `,
+// });
+// function getInputToEditContentQA(contentCard, row) {
+//     isInputOn = contentBoard.contains(getToDo);
+//     if (isInputOn) {
+//         getToDo.scrollIntoView({
+//             behavior: "smooth",
+//             block: "start", // start | center | end | nearest
+//         });
+//         getToDo.querySelector(`.tempToGetToDo-A`).focus();
+//         mainNotification(`Finish what you are editing`, `red`);
+//         return;
+//     }
+
+//     const Q = row.querySelector(`.QA-Q`);
+//     const A = row.querySelector(`.QA-A`);
+//     row.replaceWith(getToDo);
+
+//     const inputQ = getToDo.querySelector(`.tempToGetToDo-Q`);
+//     const inputA = getToDo.querySelector(`.tempToGetToDo-A`);
+
+//     inputQ.value = Q.textContent;
+//     inputA.value = A.textContent;
+
+//     getToDo.onclick = async (e) => {
+//         const list = e.target.classList;
+//         if (list.contains(`submit`)) {
+//             getToDo.replaceWith(row);
+//             const projectId = getActiveProject(`id`);
+//             const sectionId = getActiveSection(`id`);
+//             const contentId = contentCard.getAttribute(`data-content-id`);
+//             const rowId = row.getAttribute(`data-qa-row-id`);
+//             const clone = getSectionSourceList(projectId);
+//             clone[sectionId].contentData[contentId].rows[rowId] = [
+//                 inputQ.value,
+//                 inputA.value,
+//             ];
+//             await updateData(projectId, { pageData: clone });
+//             await updateMainData();
+//             renderContent();
+//         } else if (list.contains(`close`)) {
+//             getToDo.replaceWith(row);
+//         }
+//     };
+// }
+
+// async function deleteContentQA(contentCard, row) {
+//     const ok = await askConfirm("Sure to delete this ?");
+//     if (!ok) return;
+//     const projectId = getActiveProject(`id`);
+//     const sectionId = getActiveSection(`id`);
+//     const contentId = contentCard.getAttribute(`data-content-id`);
+//     const rowId = row.getAttribute(`data-qa-row-id`);
+//     const clone = getSectionSourceList(projectId);
+//     delete clone[sectionId].contentData[contentId].rows[rowId];
+//     await updateData(projectId, { pageData: clone });
+//     await updateMainData();
+//     renderContent();
+// }

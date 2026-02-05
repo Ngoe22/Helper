@@ -1,4 +1,6 @@
 const URL = `https://6963c4b02d146d9f58d45a80.mockapi.io/test/data`;
+const RemindURL = `https://6963c4b02d146d9f58d45a80.mockapi.io/test/remider`;
+
 
 async function getData(id) {
     const thisUrl = id ? `${API_URL}/${id}` : URL;

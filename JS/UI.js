@@ -52,3 +52,109 @@ function askConfirm(message) {
         }
     });
 }
+
+//  -------------- TIME ZONES --------------
+
+const TIME_ZONES = {
+    "UTC-12": "Etc/GMT+12",
+    "UTC-11": "Pacific/Pago_Pago",
+    "UTC-10": "Pacific/Honolulu",
+    "UTC-9": "America/Anchorage",
+    "UTC-8": "America/Los_Angeles",
+    "UTC-7": "America/Denver",
+    "UTC-6": "America/Chicago",
+    "UTC-5": "America/New_York",
+    "UTC-4": "America/Halifax",
+    "UTC-3": "America/Sao_Paulo",
+    "UTC-2": "Etc/GMT+2",
+    "UTC-1": "Atlantic/Azores",
+    "UTC+0": "Europe/London",
+    "UTC+1": "Europe/Paris",
+    "UTC+2": "Europe/Athens",
+    "UTC+3": "Europe/Moscow",
+    "UTC+4": "Asia/Dubai",
+    "UTC+5": "Asia/Karachi",
+    "UTC+6": "Asia/Dhaka",
+    "UTC+7": "Asia/Ho_Chi_Minh",
+    "UTC+8": "Asia/Shanghai",
+    "UTC+9": "Asia/Tokyo",
+    "UTC+10": "Australia/Sydney",
+    "UTC+12": "Pacific/Auckland",
+    "UTC+14": "Pacific/Kiritimati",
+};
+
+// render
+
+const timezoneBtn = document.querySelector(".timezone-btn");
+const timezoneList = document.querySelector(".timezone-list");
+const clock = document.getElementById("clock");
+
+function renderTimezoneList() {
+    let html = ``;
+    const TIME_ZONES_ARRAY = Object.entries(TIME_ZONES);
+    const timeZone = localStorage.getItem("userTimezone") || "Asia/Ho_Chi_Minh";
+    let check = ``;
+    for (let [key, value] of TIME_ZONES_ARRAY) {
+        html += `
+        <label class = "timezone-item" data-timezone="${value}" >
+            ${key} | ${value}
+            <input type="radio" name="timezone" id="" hidden  ${timeZone === value ? `checked` : ``} />
+        </label> `;
+    }
+    timezoneList.innerHTML = html;
+}
+renderTimezoneList();
+
+// logic
+
+timezoneBtn.onclick = (e) => {
+    e.stopPropagation();
+    timezoneList.classList.toggle("hide");
+};
+
+timezoneList.onclick = (e) => {
+    if (e.target.type !== "radio") return;
+    const label = e.target.closest("label");
+    const timezone = label.dataset.timezone;
+    localStorage.setItem("userTimezone", timezone);
+    timezoneList.classList.add("hide");
+    updateClock2();
+};
+
+function getTimeByUTC(timeZone) {
+    const parts = new Intl.DateTimeFormat("vi-VN", {
+        timeZone,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour12: false,
+    }).formatToParts(new Date());
+
+    const map = {};
+    parts.forEach((p) => (map[p.type] = p.value));
+
+    return `${map.hour}:${map.minute}:${map.second} | ${map.day}/${map.month}/${map.year}`;
+}
+
+function updateClock2() {
+    const timeZone = localStorage.getItem("userTimezone") || "Asia/Ho_Chi_Minh";
+    clock.innerText = getTimeByUTC(timeZone);
+}
+
+updateClock2();
+setInterval(updateClock2, 1000);
+
+// setInterval(updateClock, 1000);
+// setInterval(updateClock, 1000);
+// updateClock();
+
+//
+
+function dateToTimestampSimple2(dateStr) {
+    return Date.parse(dateStr + `T00:00:00Z`);
+}
+
+console.log(dateToTimestampSimple2("2026-02-04"));
