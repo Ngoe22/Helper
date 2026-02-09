@@ -1,3 +1,8 @@
+function isMock(url) {
+    if (url.startsWith("https://") && url.includes(".mockapi.io")) return true;
+    return false;
+}
+
 function getDataBase() {
     return new Promise((resolve) => {
         const mainDB = localStorage.getItem("mainDB");
@@ -14,6 +19,7 @@ function getDataBase() {
         getDB.className = `getDb`;
         getDB.innerHTML = `
      <div class="getDb-box">
+                <div class="getDb-head">hi Sweetheart</div>
                 <div class="getDb-body">
                     <div class="getDb-row">
                         <div class="getDb-label">main URL</div>
@@ -23,8 +29,9 @@ function getDataBase() {
                         <div class="getDb-label">minor URL</div>
                         <input type="text" class="getDb-input minor" />
                     </div>
+                    <button class="getDb-btn">Get in</button>
                 </div>
-                <button class="getDb-btn">Get in</button>
+                
             </div>`;
 
         getDB.onclick = async (e) => {
@@ -32,14 +39,19 @@ function getDataBase() {
                 const inputForMain = getDB.querySelector(`.main`).value;
                 const inputForMinor = getDB.querySelector(`.minor`).value;
 
-                localStorage.setItem("mainDB", inputForMain);
-                localStorage.setItem("minorDB", inputForMinor);
+                if (isMock(inputForMain) && isMock(inputForMinor)) {
+                    runLoadingAnimation(true);
+                    localStorage.setItem("mainDB", inputForMain);
+                    localStorage.setItem("minorDB", inputForMinor);
 
-                mainURL = inputForMain;
-                minorURL = inputForMinor;
+                    mainURL = inputForMain;
+                    minorURL = inputForMinor;
 
-                getDB.remove();
-                resolve(true);
+                    getDB.remove();
+                    resolve(true);
+                    return;
+                }
+                mainNotification(`URL is invalid`, `red`);
             }
         };
         document.body.append(getDB);
