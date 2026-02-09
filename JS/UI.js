@@ -1,3 +1,5 @@
+
+
 // showSection.onclick = (e) => {
 //     sectionBar.classList.toggle(`width-hide`);
 // };
@@ -103,7 +105,6 @@ function renderTimezoneList() {
     }
     timezoneList.innerHTML = html;
 }
-renderTimezoneList();
 
 // logic
 
@@ -144,12 +145,7 @@ function updateClock2() {
     clock.innerText = getTimeByUTC(timeZone);
 }
 
-updateClock2();
-setInterval(updateClock2, 1000);
 
-// setInterval(updateClock, 1000);
-// setInterval(updateClock, 1000);
-// updateClock();
 
 //
 
@@ -157,4 +153,16 @@ function dateToTimestampSimple2(dateStr) {
     return Date.parse(dateStr + `T00:00:00Z`);
 }
 
-console.log(dateToTimestampSimple2("2026-02-04"));
+//  -------------- LOADING --------------
+
+const loadingAnimation = document.createElement(`div`);
+loadingAnimation.className = `loading-animation`;
+loadingAnimation.innerHTML = `<div class="loader"></div>`;
+
+function runLoadingAnimation(mode) {
+    if (mode) {
+        document.body.append(loadingAnimation);
+    } else {
+        loadingAnimation.remove();
+    }
+}

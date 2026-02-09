@@ -21,20 +21,21 @@ const sectionBar = document.querySelector(`.section-list`);
 const contentBoard = document.querySelector(`.content-board`);
 const showSection = document.querySelector(`.show-section`);
 // console.log(testingList);
-let testingList = [];
+let mainData = [];
+let minorData = [];
 
 async function updateMainData() {
-    testingList = await getData();
+    mainData = await getData(mainURL);
     projectListRender();
 }
-updateMainData();
 
-function waterFallOfIf(values, logText) {
-    for (let i in values) {
-        if (values[i]) {
-            console.log(logText[i]);
-            return true;
-        }
+async function updateMinorData() {
+    minorData = await getData(minorURL);
+
+    if (!minorData[0]) {
+        postData(minorURL, { id: `1`, name: `reminder`, list: {} });
     }
-    return false;
 }
+
+// minorURL[0] == reminder
+

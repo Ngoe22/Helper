@@ -29,7 +29,12 @@
 .tempToGetQA-btns {
     padding: 5px 10px;
     display: flex;
+    flex-direction: column;
     gap: 10px;
+}
+
+.QA-btns {
+    flex-direction: row;
 }
 
 .tempToGetQA-Q {

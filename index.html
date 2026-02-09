@@ -13,14 +13,11 @@
         <link rel="stylesheet" href="./CSS/style.css" />
         <link rel="stylesheet" href="./CSS/contents/QA.css" />
         <link rel="stylesheet" href="./CSS/contents/toDo.css" />
+        <link rel="stylesheet" href="./CSS/contents/UI.css" />
     </head>
     <body>
         <div class="main-wrapper">
-            <input type="date" />
             <div class="header">
-                <button onclick="console.log(testingList)">
-                    show testingList
-                </button>
                 <div class="time-block">
                     <div id="clock"></div>
                     <div class="timezone-board">
@@ -37,7 +34,6 @@
                             <button class="project-list-btn">Project</button>
                             <ul class="project-list hide"></ul>
                         </div>
-                        <!-- <button class="show-section">show</button> -->
                     </div>
                     <ul class="project-pinList"></ul>
                 </div>
@@ -52,12 +48,15 @@
                 </div>
             </div>
         </div>
-        
+        <!--  -->
+
         <!-- JS -->
 
         <script src="./JS/toServer.js"></script>
         <script src="./JS/main.js"></script>
         <script src="./JS/toRender.js"></script>
+        <script src="./JS/reminder.js"></script>
         <script src="./JS/UI.js"></script>
+        <script src="./JS/start.js"></script>
     </body>
 </html>

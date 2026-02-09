@@ -1,8 +1,12 @@
-const URL = `https://6963c4b02d146d9f58d45a80.mockapi.io/test/data`;
-const RemindURL = `https://6963c4b02d146d9f58d45a80.mockapi.io/test/remider`;
+// const mainURL = `https://6963c4b02d146d9f58d45a80.mockapi.io/test/data`;
+// const minorURL = `https://6963c4b02d146d9f58d45a80.mockapi.io/test/minor`;
+
+let mainURL = ``;
+let minorURL = ``;
 
 
-async function getData(id) {
+
+async function getData(URL, id) {
     const thisUrl = id ? `${API_URL}/${id}` : URL;
     try {
         const response = await fetch(thisUrl);
@@ -18,7 +22,7 @@ async function getData(id) {
     }
 }
 
-async function postData(data) {
+async function postData(URL, data) {
     try {
         const response = await fetch(URL, {
             method: "POST",
@@ -38,7 +42,7 @@ async function postData(data) {
     }
 }
 
-async function deleteData(id) {
+async function deleteData(URL, id) {
     try {
         const response = await fetch(`${URL}/${id}`, {
             method: "DELETE",
@@ -59,7 +63,7 @@ async function deleteData(id) {
     }
 }
 
-async function updateData(id, data) {
+async function updateData(URL, id, data) {
     try {
         const response = await fetch(`${URL}/${id}`, {
             method: "PUT",

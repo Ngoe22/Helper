@@ -22,7 +22,6 @@ projectList.onclick = (e) => {
     if (parent.classList.contains(`add`)) {
         addTag(parent, `project`);
     } else if (nCl.contains(`project-item`) || nCl.contains(`text`)) {
-        //
         addToPin(parent);
     } else if (nCl.contains(`edit`)) {
         editTagName(parent, `project`);
@@ -96,19 +95,26 @@ contentBoard.onclick = (e) => {
         addContentQARow(contentCard);
     } else if (list.contains(`QA-row-edit`)) {
         const row = node.closest(`.QA-row`);
-        getInputToEditContentQA(contentCard, row);
+        getInputToEditContentOfQARow(contentCard, row);
     } else if (list.contains(`QA-row-destroy`)) {
-        deleteContentQA(contentCard, node.closest(`.QA-row`));
+        deleteContentQARow(contentCard, node.closest(`.QA-row`));
     } else if (list.contains(`toDo-add-new-row`)) {
-        // addContentTodoRow(contentCard);
         addContentToDoRow(contentCard);
     } else if (list.contains(`toDo-row-edit`)) {
         const row = node.closest(`.toDo-row`);
-        // getInputToEditContentQA(contentCard, row);
-        getInputToEditContentQA(contentCard, row);
+        getInputToEditContentOfToDoRow(contentCard, row);
     } else if (list.contains(`toDo-row-destroy`)) {
-        // deleteContentQA(contentCard, node.closest(`.QA-row`));
-        deleteContentToDo(contentCard, node.closest(`.toDo-row`));
+        deleteContentToDoRow(contentCard, node.closest(`.toDo-row`));
+    } else if (list.contains(`toDo-due-date`)) {
+        node.onchange = (e) => {
+            updateDueForToDo(contentCard, node.closest(`.toDo-row`));
+        };
+    } else if (list.contains(`toDo-due-time`)) {
+        node.onchange = (e) => {
+            updateDueForToDo(contentCard, node.closest(`.toDo-row`));
+        };
+    } else if (list.contains(`toDo-due-reset`)) {
+        resetDueForToDo(contentCard, node.closest(`.toDo-row`));
     }
 
     //
@@ -186,18 +192,32 @@ function makeID() {
 function getActiveProject(atr = false) {
     const node = projectPinBar.querySelector(`.project-pinItem.active`);
     if (!node) return false;
-    return atr === `id` ? node.getAttribute(`data-project-id`) : node;
+
+    if (atr === `id`) {
+        return node.getAttribute(`data-project-id`);
+    } else if (atr === `text`) {
+        return node.textContent.trim();
+    } else {
+        return node;
+    }
 }
 function getActiveSection(atr = false) {
     const node = sectionBar.querySelector(`.section-item.active`);
     if (!node) return false;
-    return atr === `id` ? node.getAttribute(`data-section-id`) : node;
+
+    if (atr === `id`) {
+        return node.getAttribute(`data-section-id`);
+    } else if (atr === `text`) {
+        return node.textContent.trim();
+    } else {
+        return node;
+    }
 }
 
 // function
 
 function getProjectSource(projectId) {
-    return dataQuery(testingList, [
+    return dataQuery(mainData, [
         {
             key: `id`,
             value: projectId,
@@ -206,7 +226,7 @@ function getProjectSource(projectId) {
     ]);
 }
 function getSectionSource(projectId, sectionId) {
-    return dataQuery(testingList, [
+    return dataQuery(mainData, [
         {
             key: `id`,
             value: projectId,
@@ -220,7 +240,7 @@ function getSectionSource(projectId, sectionId) {
     ]);
 }
 function getSectionSourceList(projectId) {
-    return dataQuery(testingList, [
+    return dataQuery(mainData, [
         {
             key: `id`,
             value: projectId,
@@ -229,7 +249,7 @@ function getSectionSourceList(projectId) {
     ]);
 }
 function getContentSourceList(projectId, sectionId) {
-    return dataQuery(testingList, [
+    return dataQuery(mainData, [
         {
             key: `id`,
             value: projectId,
@@ -294,6 +314,9 @@ function addInputTag(parentTag, submitCb) {
     const defaultText = parentTag.querySelector(`.text`);
     if (defaultText)
         inputTag.querySelector(`input`).value = defaultText.textContent;
+    else {
+        inputTag.querySelector(`input`).value = ``;
+    }
     parentTag.append(inputTag);
     inputText.focus();
     inputTag.onclick = (e) => {
@@ -311,7 +334,6 @@ function addInputTag(parentTag, submitCb) {
                 }
             });
         } else if (cl.contains(`close`)) {
-            //
             addInputTag.onClose();
         }
     };
@@ -344,17 +366,20 @@ function editTagName(tag, type = ``) {
         }
 
         //
-        return (result =
+        runLoadingAnimation(true);
+        //
+        let result =
             type === `project`
                 ? await projectUpdateToServer(id, newName)
-                : await sectionUpdateToServer(id, newName));
+                : await sectionUpdateToServer(id, newName);
+
+        runLoadingAnimation(false);
+        return result;
     }
     addInputTag(tag, editTagNameCallBack);
 }
 async function projectUpdateToServer(id, newName) {
-    // const clone = structuredClone(getProjectSource(id));
-    // clone.name = newName;
-    if (!(await updateData(id, { name: newName }))) return false;
+    if (!(await updateData(mainURL, id, { name: newName }))) return false;
     updateMainData();
     editTextOfTag(projectList, `[data-project-id="${id}"] .text`, newName);
     editTextOfTag(projectPinBar, `[data-project-id="${id}"] .text`, newName);
@@ -364,7 +389,8 @@ async function sectionUpdateToServer(id, newName) {
     const projectId = getActiveProject(`id`);
     const clone = structuredClone(getSectionSourceList(projectId));
     clone[id].name = newName;
-    if (!(await updateData(projectId, { pageData: clone }))) return false;
+    if (!(await updateData(mainURL, projectId, { pageData: clone })))
+        return false;
     updateMainData();
     editTextOfTag(sectionBar, `[data-section-id="${id}"] .text`, newName);
     return true;
@@ -374,7 +400,6 @@ async function sectionUpdateToServer(id, newName) {
 
 function addTag(tag, type = ``) {
     if (![`section`, `project`].includes(type)) return;
-
     async function addTagCallBack(inputTag) {
         // xu ly xss
         // project
@@ -395,16 +420,21 @@ function addTag(tag, type = ``) {
         }
         // return false;
         //
-        return (result =
+
+        runLoadingAnimation(true);
+        let result =
             type === `project`
                 ? await addProjectToServer(newName)
-                : await addSectionToServer(newName));
+                : await addSectionToServer(newName);
+
+        runLoadingAnimation(false);
+        return result;
     }
     addInputTag(tag, addTagCallBack);
 }
 async function addProjectToServer(newName) {
     const parentId = makeID();
-    const results = await postData({
+    const results = await postData(mainURL, {
         name: newName,
         csId: parentId,
         pageData: {},
@@ -432,7 +462,7 @@ async function addSectionToServer(newName) {
 
     console.log(clone);
     // return true;
-    const result = await updateData(projectId, { pageData: clone });
+    const result = await updateData(mainURL, projectId, { pageData: clone });
     if (!result) return false;
     await updateMainData();
     sectionBar.insertAdjacentHTML(
@@ -447,7 +477,7 @@ async function addSectionToServer(newName) {
 
 function projectListRender() {
     projectList.innerHTML = `<li class="project-item add"></li>`;
-    testingList.forEach((value) => {
+    mainData.forEach((value) => {
         //
         projectList.insertAdjacentHTML(
             `beforeend`,
@@ -460,12 +490,14 @@ async function deleteProject(tag) {
     const ok = await askConfirm("Sure to delete this ?");
     if (!ok) return;
 
+    runLoadingAnimation(true);
     const id = tag.getAttribute(`data-project-id`);
-    const result = await deleteData(id);
+    const result = await deleteData(mainURL, id);
     if (!result) return console.log(`delete fail`);
     closePin(tag);
     await updateMainData();
     projectListRender();
+    runLoadingAnimation(false);
 }
 
 // pin
@@ -530,35 +562,25 @@ async function deleteSection(tag) {
     const ok = await askConfirm("Sure to delete this ?");
     if (!ok) return;
 
+    runLoadingAnimation(true);
+    //
     const id = tag.getAttribute(`data-section-id`);
     const projectId = getActiveProject(`id`);
     // send delete on server
     const clone = structuredClone(getSectionSourceList(projectId));
     delete clone[id];
     // deleteArrayElById(clone, id);
-    if (!(await updateData(projectId, { pageData: clone }))) return false;
+    if (!(await updateData(mainURL, projectId, { pageData: clone })))
+        return false;
     await updateMainData();
     if (tag.classList.contains(`active`)) parentCLear([contentBoard]);
     sectionBarRender(projectId);
+    //
+    runLoadingAnimation(false);
     return true;
 }
 
 // content
-// function contentRender(sectionId) {
-//     const projectId = getActiveProject(`id`);
-//     const data = Array.from(getContentSourceList(projectId, sectionId));
-
-//     let html = ``;
-//     // data.forEach((content) => {
-//     //     html += `<div class="contentItem" data-content-id="${content.id}" >${content.html}</div>`;
-//     // });
-//     html += `
-//     <div class="tools">
-//         <div class="tool add-a-QA">QA</div>
-//         <div class="tool work-flow">WF</div>
-//     </div>`;
-//     contentBoard.innerHTML = html;
-// }
 
 function getNewNameForContentCard(card) {
     if (!card) return;
@@ -589,28 +611,38 @@ function getNewNameForContentCard(card) {
 }
 
 async function editContentCard(card, nameNode, newName) {
+    runLoadingAnimation(true);
+    //
     const id = card.getAttribute(`data-content-id`);
     const projectId = getActiveProject(`id`);
     const sectionId = getActiveSection(`id`);
     const clone = structuredClone(getSectionSourceList(projectId));
     clone[sectionId].contentData[id].name = newName;
-    await updateData(projectId, { pageData: clone });
+    await updateData(mainURL, projectId, { pageData: clone });
     await updateMainData();
     nameNode.textContent = newName;
+    //
+    runLoadingAnimation(false);
 }
 
 async function deleteContentCard(card) {
     const ok = await askConfirm("Sure to delete this ?");
     if (!ok) return;
 
+    //
+    runLoadingAnimation(true);
+    //
+
     const id = card.getAttribute(`data-content-id`);
     const projectId = getActiveProject(`id`);
     const sectionId = getActiveSection(`id`);
     const clone = structuredClone(getSectionSourceList(projectId));
     delete clone[sectionId].contentData[id];
-    await updateData(projectId, { pageData: clone });
+    await updateData(mainURL, projectId, { pageData: clone });
     await updateMainData();
     card.remove();
+    //
+    runLoadingAnimation(false);
 }
 
 // --------------------------------------------- content
@@ -654,21 +686,23 @@ function renderContent() {
 
 async function contentAddQA(node) {
     //
+    runLoadingAnimation(true);
+    //
     const newId = makeID();
     const projectId = getActiveProject(`id`);
     const sectionId = getActiveSection(`id`);
     const clone = structuredClone(getSectionSourceList(projectId));
     //
-
     clone[sectionId].contentData[newId] = {
         name: `newQA`,
         id: newId,
         type: `QA`,
         rows: {},
     };
-    await updateData(projectId, { pageData: clone });
+    await updateData(mainURL, projectId, { pageData: clone });
     await updateMainData();
     renderContent();
+    runLoadingAnimation(false);
 }
 
 function renderContentQA(obj) {
@@ -692,15 +726,19 @@ function renderContentQA(obj) {
 }
 
 async function addContentQARow(contentCard) {
+    runLoadingAnimation(true);
+    //
     const newRowId = makeID();
     const contentId = contentCard.getAttribute(`data-content-id`);
     const projectId = getActiveProject(`id`);
     const sectionId = getActiveSection(`id`);
     const clone = getSectionSourceList(projectId);
     clone[sectionId].contentData[contentId].rows[newRowId] = [`Q`, `A`];
-    await updateData(projectId, { pageData: clone });
+    await updateData(mainURL, projectId, { pageData: clone });
     await updateMainData();
     renderContent();
+    //
+    runLoadingAnimation(false);
 }
 
 const getQA = makeANode({
@@ -715,7 +753,7 @@ const getQA = makeANode({
         </div>
         `,
 });
-function getInputToEditContentQA(contentCard, row) {
+function getInputToEditContentOfQARow(contentCard, row) {
     isInputOn = contentBoard.contains(getQA);
     if (isInputOn) {
         getQA.scrollIntoView({
@@ -723,7 +761,7 @@ function getInputToEditContentQA(contentCard, row) {
             block: "start", // start | center | end | nearest
         });
         getQA.querySelector(`.tempToGetQA-A`).focus();
-        mainNotification(`Finish what you are editing`, `red`);
+        mainNotification(`Finish what QA you are editing`, `red`);
         return;
     }
 
@@ -740,6 +778,9 @@ function getInputToEditContentQA(contentCard, row) {
     getQA.onclick = async (e) => {
         const list = e.target.classList;
         if (list.contains(`submit`)) {
+            //
+            runLoadingAnimation(true);
+            //
             getQA.replaceWith(row);
             const projectId = getActiveProject(`id`);
             const sectionId = getActiveSection(`id`);
@@ -750,32 +791,45 @@ function getInputToEditContentQA(contentCard, row) {
                 inputQ.value,
                 inputA.value,
             ];
-            await updateData(projectId, { pageData: clone });
+            await updateData(mainURL, projectId, { pageData: clone });
             await updateMainData();
             renderContent();
+            //
+            runLoadingAnimation(false);
+            //
         } else if (list.contains(`close`)) {
             getQA.replaceWith(row);
         }
     };
 }
 
-async function deleteContentQA(contentCard, row) {
+async function deleteContentQARow(contentCard, row) {
     const ok = await askConfirm("Sure to delete this ?");
     if (!ok) return;
+
+    //
+    runLoadingAnimation(true);
+    //
     const projectId = getActiveProject(`id`);
     const sectionId = getActiveSection(`id`);
     const contentId = contentCard.getAttribute(`data-content-id`);
     const rowId = row.getAttribute(`data-qa-row-id`);
     const clone = getSectionSourceList(projectId);
     delete clone[sectionId].contentData[contentId].rows[rowId];
-    await updateData(projectId, { pageData: clone });
+    await updateData(mainURL, projectId, { pageData: clone });
     await updateMainData();
     renderContent();
+
+    //
+    runLoadingAnimation(false);
+    //
 }
 
 // toDo list part
 
 async function contentAddToDo() {
+    //
+    runLoadingAnimation(true);
     //
     const newId = makeID();
     const projectId = getActiveProject(`id`);
@@ -789,20 +843,23 @@ async function contentAddToDo() {
         type: `toDo`,
         rows: {},
     };
-    await updateData(projectId, { pageData: clone });
+    await updateData(mainURL, projectId, { pageData: clone });
     await updateMainData();
     renderContent();
+    runLoadingAnimation(false);
 }
 
 function renderContentToDo(toDoList) {
     const list = Object.entries(toDoList);
     let html = ``;
-    for (let [key, QA] of list) {
+    // [ title , content , date ,time ]
+    for (let [key, obj] of list) {
         html += `<div class="toDo-row" data-todo-row-id="${key}">
             <div class="toDo-header">
-                <div class="toDo-due-time">
-                    <span class="text">due</span>
-                    <span class="time"></span>
+                <div class="toDo-due">          
+                    <input type="date" class = "toDo-due-date" value="${obj.dueDate}"/>
+                    <input type="time" class = "toDo-due-time"  value="${obj.dueTime}" >
+                    <div class="toDo-due-reset">reset time</div>
                 </div>
                 <div class="toDo-btns">
                     <button class="toDo-btn toDo-row-edit edit"></button>
@@ -810,8 +867,8 @@ function renderContentToDo(toDoList) {
                 </div>
             </div>
             <div class="toDo-QA">
-                <div class="toDo-Q">${QA[0]}</div>
-                <div class="toDo-A">${QA[1]}</div>
+                <div class="toDo-Q">${obj.taskTitle}</div>
+                <div class="toDo-A">${obj.taskContent}</div>
             </div>
         </div>`;
     }
@@ -822,32 +879,44 @@ function renderContentToDo(toDoList) {
 }
 
 async function addContentToDoRow(contentCard) {
+    runLoadingAnimation(true);
+    //
     const newRowId = makeID();
     const contentId = contentCard.getAttribute(`data-content-id`);
     const projectId = getActiveProject(`id`);
     const sectionId = getActiveSection(`id`);
     const clone = getSectionSourceList(projectId);
-    clone[sectionId].contentData[contentId].rows[newRowId] = [
-        `title`,
-        `content`,
-    ];
-    await updateData(projectId, { pageData: clone });
+    clone[sectionId].contentData[contentId].rows[newRowId] = {
+        taskTitle: `task name`,
+        taskContent: `task content`,
+        dueDate: ``,
+        dueTime: ``,
+    };
+    // [ title , content , date ,time ]
+    await updateData(mainURL, projectId, { pageData: clone });
     await updateMainData();
     renderContent();
+    //
+    runLoadingAnimation(false);
 }
 
-async function deleteContentToDo(contentCard, row) {
+async function deleteContentToDoRow(contentCard, row) {
     const ok = await askConfirm("Sure to delete this ?");
     if (!ok) return;
+
+    runLoadingAnimation(true);
     const projectId = getActiveProject(`id`);
     const sectionId = getActiveSection(`id`);
     const contentId = contentCard.getAttribute(`data-content-id`);
     const rowId = row.getAttribute(`data-todo-row-id`);
     const clone = getSectionSourceList(projectId);
     delete clone[sectionId].contentData[contentId].rows[rowId];
-    await updateData(projectId, { pageData: clone });
+    await updateData(mainURL, projectId, { pageData: clone });
     await updateMainData();
+    await updateReminder(rowId, {}, false);
     renderContent();
+
+    runLoadingAnimation(false);
 }
 
 const getToDo = makeANode({
@@ -862,7 +931,7 @@ const getToDo = makeANode({
         </div>
         `,
 });
-function getInputToEditContentQA(contentCard, row) {
+function getInputToEditContentOfToDoRow(contentCard, row) {
     isInputOn = contentBoard.contains(getToDo);
     if (isInputOn) {
         getToDo.scrollIntoView({
@@ -870,7 +939,7 @@ function getInputToEditContentQA(contentCard, row) {
             block: "start", // start | center | end | nearest
         });
         getToDo.querySelector(`.tempToGetToDo-A`).focus();
-        mainNotification(`Finish what you are editing`, `red`);
+        mainNotification(`Finish what todoList you are editing`, `red`);
         return;
     }
 
@@ -887,142 +956,76 @@ function getInputToEditContentQA(contentCard, row) {
     getToDo.onclick = async (e) => {
         const list = e.target.classList;
         if (list.contains(`submit`)) {
+            runLoadingAnimation(true);
+            //
             getToDo.replaceWith(row);
             const projectId = getActiveProject(`id`);
             const sectionId = getActiveSection(`id`);
             const contentId = contentCard.getAttribute(`data-content-id`);
             const rowId = row.getAttribute(`data-todo-row-id`);
             const clone = getSectionSourceList(projectId);
-            clone[sectionId].contentData[contentId].rows[rowId] = [
-                inputQ.value,
-                inputA.value,
-            ];
-            await updateData(projectId, { pageData: clone });
+
+            const obj = clone[sectionId].contentData[contentId].rows[rowId];
+            obj.taskTitle = inputQ.value;
+            obj.taskContent = inputA.value;
+
+            await updateData(mainURL, projectId, { pageData: clone });
             await updateMainData();
             renderContent();
+            //
+            runLoadingAnimation(false);
         } else if (list.contains(`close`)) {
             getToDo.replaceWith(row);
         }
     };
 }
 
-// async function contentAddQA(node) {
-//     //
-//     const newId = makeID();
-//     const projectId = getActiveProject(`id`);
-//     const sectionId = getActiveSection(`id`);
-//     const clone = structuredClone(getSectionSourceList(projectId));
-//     //
+async function updateDueForToDo(contentCard, row) {
+    //
 
-//     clone[sectionId].contentData[newId] = {
-//         name: `newQA`,
-//         id: newId,
-//         type: `QA`,
-//         rows: {},
-//     };
-//     await updateData(projectId, { pageData: clone });
-//     await updateMainData();
-//     renderContent();
-// }
+    const rowId = row.getAttribute(`data-todo-row-id`);
+    const currentDate = row.querySelector(`.toDo-due-date`).value;
+    const currentTime = row.querySelector(`.toDo-due-time`).value;
 
-// function renderContentQA(obj) {
-//     const list = Object.entries(obj);
-//     let html = ``;
-//     for (let [key, QA] of list) {
-//         html += `<div class="QA-row"   data-qa-row-id = "${key}">
-//             <div class="QA-Q">${QA[0]}</div>
-//             <div class="QA-A">${QA[1]}</div>
-//             <div class="QA-btns">
-//                 <button class="QA-btn QA-row-edit edit"></button>
-//                 <button class="QA-btn QA-row-destroy destroy"></button>
-//             </div>
-//         </div>`;
-//     }
-//     // lop obj => add to html
-//     return `<div class="QA-card">
-//                 <div class="QA-body">${html}</div>
-//                 <div class="QA-add-new-row"></div>
-//             </div>`;
-// }
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const contentId = contentCard.getAttribute(`data-content-id`);
 
-// async function addContentQARow(contentCard) {
-//     const newRowId = makeID();
-//     const contentId = contentCard.getAttribute(`data-content-id`);
-//     const projectId = getActiveProject(`id`);
-//     const sectionId = getActiveSection(`id`);
-//     const clone = getSectionSourceList(projectId);
-//     clone[sectionId].contentData[contentId].rows[newRowId] = [`Q`, `A`];
-//     await updateData(projectId, { pageData: clone });
-//     await updateMainData();
-//     renderContent();
-// }
+    const clone = getSectionSourceList(projectId);
+    const obj = clone[sectionId].contentData[contentId].rows[rowId];
+    obj.dueDate = currentDate;
+    obj.dueTime = currentTime;
 
-// const getToDo = makeANode({
-//     tagName: `div`,
-//     initClass: `tempToGetToDo`,
-//     innerHtml: `
-//         <textarea class="tempToGetToDo-Q" ></textarea>
-//         <textarea  class="tempToGetToDo-A" ></textarea>
-//         <div class="tempToGetToDo-btns">
-//             <button class="submit"></button>
-//             <button class="close"></button>
-//         </div>
-//         `,
-// });
-// function getInputToEditContentQA(contentCard, row) {
-//     isInputOn = contentBoard.contains(getToDo);
-//     if (isInputOn) {
-//         getToDo.scrollIntoView({
-//             behavior: "smooth",
-//             block: "start", // start | center | end | nearest
-//         });
-//         getToDo.querySelector(`.tempToGetToDo-A`).focus();
-//         mainNotification(`Finish what you are editing`, `red`);
-//         return;
-//     }
+    // runLoadingAnimation(true);
 
-//     const Q = row.querySelector(`.QA-Q`);
-//     const A = row.querySelector(`.QA-A`);
-//     row.replaceWith(getToDo);
+    await updateData(mainURL, projectId, { pageData: clone });
+    await updateMainData();
 
-//     const inputQ = getToDo.querySelector(`.tempToGetToDo-Q`);
-//     const inputA = getToDo.querySelector(`.tempToGetToDo-A`);
+    if (currentDate || currentTime) {
+        console.log(`lmeow`);
 
-//     inputQ.value = Q.textContent;
-//     inputA.value = A.textContent;
+        await updateReminder(rowId, {
+            projectId: projectId,
+            sectionId: sectionId,
+            contentId: contentId,
+            rowId: rowId,
+            date: currentDate,
+            time: currentTime,
+        });
+    } else {
+        await updateReminder(rowId, {}, false);
+    }
+    await updateMinorData();
+    renderContent();
+    // runLoadingAnimation(false);
+}
 
-//     getToDo.onclick = async (e) => {
-//         const list = e.target.classList;
-//         if (list.contains(`submit`)) {
-//             getToDo.replaceWith(row);
-//             const projectId = getActiveProject(`id`);
-//             const sectionId = getActiveSection(`id`);
-//             const contentId = contentCard.getAttribute(`data-content-id`);
-//             const rowId = row.getAttribute(`data-qa-row-id`);
-//             const clone = getSectionSourceList(projectId);
-//             clone[sectionId].contentData[contentId].rows[rowId] = [
-//                 inputQ.value,
-//                 inputA.value,
-//             ];
-//             await updateData(projectId, { pageData: clone });
-//             await updateMainData();
-//             renderContent();
-//         } else if (list.contains(`close`)) {
-//             getToDo.replaceWith(row);
-//         }
-//     };
-// }
-
-// async function deleteContentQA(contentCard, row) {
-//     const ok = await askConfirm("Sure to delete this ?");
-//     if (!ok) return;
-//     const projectId = getActiveProject(`id`);
-//     const sectionId = getActiveSection(`id`);
-//     const contentId = contentCard.getAttribute(`data-content-id`);
-//     const rowId = row.getAttribute(`data-qa-row-id`);
-//     const clone = getSectionSourceList(projectId);
-//     delete clone[sectionId].contentData[contentId].rows[rowId];
-//     await updateData(projectId, { pageData: clone });
-//     await updateMainData();
-//     renderContent();
-// }
+async function resetDueForToDo(contentCard, row) {
+    const currentDate = row.querySelector(`.toDo-due-date`).value;
+    const currentTime = row.querySelector(`.toDo-due-time`).value;
+    if (currentDate || currentTime) {
+        row.querySelector(`.toDo-due-date`).value = ``;
+        row.querySelector(`.toDo-due-time`).value = ``;
+        updateDueForToDo(contentCard, row);
+    }
+}
