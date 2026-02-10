@@ -91,6 +91,7 @@ contentBoard.onclick = (e) => {
         getNewNameForContentCard(contentCard);
     } else if (list.contains(`destroy-red`)) {
         deleteContentCard(contentCard);
+        // deleteReminderContentCard(contentCard);
     } else if (list.contains(`QA-add-new-row`)) {
         addContentQARow(contentCard);
     } else if (list.contains(`QA-row-edit`)) {
@@ -629,6 +630,8 @@ async function deleteContentCard(card) {
     const ok = await askConfirm("Sure to delete this ?");
     if (!ok) return;
 
+    await deleteReminderContentCard(card);
+
     //
     runLoadingAnimation(true);
     //
@@ -998,12 +1001,10 @@ async function updateDueForToDo(contentCard, row) {
 
     // runLoadingAnimation(true);
 
-    await updateData(mainURL, projectId, { pageData: clone });
-    await updateMainData();
+    await updateData(mainURL, projectId, { pageData: clone }); // push
+    await updateMainData(); // pull
 
     if (currentDate || currentTime) {
-        console.log(`lmeow`);
-
         await updateReminder(rowId, {
             projectId: projectId,
             sectionId: sectionId,
@@ -1015,9 +1016,9 @@ async function updateDueForToDo(contentCard, row) {
     } else {
         await updateReminder(rowId, {}, false);
     }
-    await updateMinorData();
-    renderContent();
     // runLoadingAnimation(false);
+    // updateReminder  include    updateMinorData();
+    // renderContent();
 }
 
 async function resetDueForToDo(contentCard, row) {
@@ -1028,4 +1029,23 @@ async function resetDueForToDo(contentCard, row) {
         row.querySelector(`.toDo-due-time`).value = ``;
         updateDueForToDo(contentCard, row);
     }
+}
+
+async function deleteReminderContentCard(contentCard) {
+    const type = contentCard.getAttribute(`data-content-type`);
+    if (type !== `toDo`) return false;
+    const list = contentCard.querySelectorAll(`[data-todo-row-id]`);
+    if (!list) return false;
+    runLoadingAnimation(true);
+    const clone = structuredClone(minorData[0]);
+    // data-todo-row-id
+    for (let row of list) {
+        let id = row.getAttribute(`data-todo-row-id`);
+        delete clone.list[id];
+    }
+
+    await updateData(minorURL, `1`, clone);
+    runLoadingAnimation(false);
+
+    return;
 }

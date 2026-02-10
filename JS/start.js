@@ -63,8 +63,8 @@ async function start() {
     setInterval(updateClock2, 1000);
     renderTimezoneList();
     await getDataBase();
-    await renderReminder();
     await updateMainData();
+    await renderReminder();
     runLoadingAnimation(false);
 }
 start();

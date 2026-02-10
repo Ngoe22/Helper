@@ -19,26 +19,6 @@ async function renderReminder() {
     for (let [rowID, obj] of list) {
         for (let project of mainData) {
             if (project.id === obj.projectId) {
-                // console.log(project.name);
-                // console.log(project.pageData[obj.sectionId].name);
-                // console.log(
-                //     project.pageData[obj.sectionId].contentData[obj.contentId]
-                //         .name,
-                // );
-                // console.log(
-                //     project.pageData[obj.sectionId].contentData[obj.contentId]
-                //         .rows[obj.rowId].taskContent,
-                // );
-                // console.log(
-                //     project.pageData[obj.sectionId].contentData[obj.contentId]
-                //         .rows[obj.rowId].taskContent,
-                // );
-                // console.log(
-                //     project.pageData[obj.sectionId].contentData[obj.contentId]
-                //         .rows[obj.rowId].taskContent,
-                // );
-                //
-
                 html += `<div class="reminder-row">
                     <div class="reminder-time">${
                         project.pageData[obj.sectionId].contentData[
@@ -63,8 +43,8 @@ async function renderReminder() {
             }
         }
     }
-    if (!html) return;
 
+    if (!html) return;
     let reminderNode = document.createElement(`div`);
     reminderNode.className = `reminder`;
     reminderNode.innerHTML = `<div class="reminder-box">
@@ -81,4 +61,3 @@ async function renderReminder() {
     };
     document.body.append(reminderNode);
 }
-
