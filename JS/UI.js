@@ -1,5 +1,3 @@
-
-
 // showSection.onclick = (e) => {
 //     sectionBar.classList.toggle(`width-hide`);
 // };
@@ -140,12 +138,27 @@ function getTimeByUTC(timeZone) {
     return `${map.hour}:${map.minute}:${map.second} | ${map.day}/${map.month}/${map.year}`;
 }
 
-function updateClock2() {
+async function updateClock2() {
     const timeZone = localStorage.getItem("userTimezone") || "Asia/Ho_Chi_Minh";
-    clock.innerText = getTimeByUTC(timeZone);
+    const text = getTimeByUTC(timeZone);
+    // console.log(text);
+
+    clock.innerText = text;
+
+    alarm(text);
 }
 
+async function alarm(time) {
+    const list = Object.entries(minorData[0].list);
+    for (let [key, value] of list) {
+        if (value.alarm === time) {
+            renderReminder(time);
+            return;
+        }
+    }
+}
 
+function alarmShow() {}
 
 //
 

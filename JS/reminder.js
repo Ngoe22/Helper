@@ -11,7 +11,7 @@ async function updateReminder(rowId, obj, add = true) {
     await updateMinorData();
 }
 
-async function renderReminder() {
+async function renderReminder(alarm = ``) {
     await updateMinorData();
     const list = Object.entries(minorData[0].list);
 
@@ -19,7 +19,7 @@ async function renderReminder() {
     for (let [rowID, obj] of list) {
         for (let project of mainData) {
             if (project.id === obj.projectId) {
-                html += `<div class="reminder-row">
+                html += `<div class="reminder-row  ${alarm === obj.alarm ? `alarm` : ""}">
                     <div class="reminder-time">${
                         project.pageData[obj.sectionId].contentData[
                             obj.contentId

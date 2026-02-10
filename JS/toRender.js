@@ -1012,6 +1012,7 @@ async function updateDueForToDo(contentCard, row) {
             rowId: rowId,
             date: currentDate,
             time: currentTime,
+            alarm: alarmFormat(currentTime, currentDate),
         });
     } else {
         await updateReminder(rowId, {}, false);
@@ -1020,6 +1021,12 @@ async function updateDueForToDo(contentCard, row) {
     // updateReminder  include    updateMinorData();
     // renderContent();
 }
+function alarmFormat(time, date) {
+    time = time + `:00`;
+    date = date.split("-").reverse().join("/");
+    return time + ` | ` + date;
+}
+
 
 async function resetDueForToDo(contentCard, row) {
     const currentDate = row.querySelector(`.toDo-due-date`).value;
