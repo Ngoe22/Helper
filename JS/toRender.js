@@ -1012,7 +1012,7 @@ async function updateDueForToDo(contentCard, row) {
             rowId: rowId,
             date: currentDate,
             time: currentTime,
-            alarm: alarmFormat(currentTime, currentDate),
+            alarm: alarmFormat(from24ToAM(currentTime), currentDate),
         });
     } else {
         await updateReminder(rowId, {}, false);
@@ -1022,11 +1022,22 @@ async function updateDueForToDo(contentCard, row) {
     // renderContent();
 }
 function alarmFormat(time, date) {
-    time = time + `:00`;
     date = date.split("-").reverse().join("/");
     return time + ` | ` + date;
 }
+function from24ToAM(time) {
+    time = time + `:00`;
+    const array = time.split(`:`);
+    var tail = ` AM`;
+    let firstNum = Number(array[0]);
 
+    if (firstNum >= 12) {
+        firstNum = firstNum > 12 ? firstNum - 12 : 12;
+        tail = ` PM`;
+    }
+    array[0] = firstNum + ``;
+    return array.join(`:`) + tail;
+}
 
 async function resetDueForToDo(contentCard, row) {
     const currentDate = row.querySelector(`.toDo-due-date`).value;

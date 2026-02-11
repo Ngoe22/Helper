@@ -120,8 +120,26 @@ timezoneList.onclick = (e) => {
     updateClock2();
 };
 
+// function getTimeByUTC(timeZone) {
+//     const parts = new Intl.DateTimeFormat("vi-VN", {
+//         timeZone,
+//         hour: "2-digit",
+//         minute: "2-digit",
+//         second: "2-digit",
+//         day: "2-digit",
+//         month: "2-digit",
+//         year: "numeric",
+//         hour12: false,
+//     }).formatToParts(new Date());
+
+//     const map = {};
+//     parts.forEach((p) => (map[p.type] = p.value));
+
+//     return `${map.hour}:${map.minute}:${map.second} | ${map.day}/${map.month}/${map.year}`;
+// }
+
 function getTimeByUTC(timeZone) {
-    const parts = new Intl.DateTimeFormat("vi-VN", {
+    const parts = new Intl.DateTimeFormat("en-US", {
         timeZone,
         hour: "2-digit",
         minute: "2-digit",
@@ -129,19 +147,18 @@ function getTimeByUTC(timeZone) {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
-        hour12: false,
+        hour12: true,
     }).formatToParts(new Date());
 
     const map = {};
     parts.forEach((p) => (map[p.type] = p.value));
 
-    return `${map.hour}:${map.minute}:${map.second} | ${map.day}/${map.month}/${map.year}`;
+    return `${map.hour}:${map.minute}:${map.second} ${map.dayPeriod} | ${map.day}/${map.month}/${map.year}`;
 }
 
 async function updateClock2() {
     const timeZone = localStorage.getItem("userTimezone") || "Asia/Ho_Chi_Minh";
     const text = getTimeByUTC(timeZone);
-    // console.log(text);
 
     clock.innerText = text;
 
@@ -150,6 +167,8 @@ async function updateClock2() {
 
 async function alarm(time) {
     const list = Object.entries(minorData[0].list);
+ 
+
     for (let [key, value] of list) {
         if (value.alarm === time) {
             renderReminder(time);
@@ -157,8 +176,6 @@ async function alarm(time) {
         }
     }
 }
-
-function alarmShow() {}
 
 //
 

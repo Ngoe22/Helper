@@ -16,10 +16,14 @@ async function renderReminder(alarm = ``) {
     const list = Object.entries(minorData[0].list);
 
     let html = ``;
+
+    let alarmHtml = ``;
+    let nonAlarmHtml = ``;
+
     for (let [rowID, obj] of list) {
         for (let project of mainData) {
             if (project.id === obj.projectId) {
-                html += `<div class="reminder-row  ${alarm === obj.alarm ? `alarm` : ""}">
+                let temp = `<div class="reminder-row  ${alarm === obj.alarm ? `alarm` : ""}">
                     <div class="reminder-time">${
                         project.pageData[obj.sectionId].contentData[
                             obj.contentId
@@ -40,16 +44,19 @@ async function renderReminder(alarm = ``) {
                         ].rows[obj.rowId].taskContent
                     }
                 </div>`;
+
+                if (alarm === obj.alarm) alarmHtml += temp;
+                else nonAlarmHtml += temp;
             }
         }
     }
 
-    if (!html) return;
+    if (!alarmHtml && !nonAlarmHtml) return;
     let reminderNode = document.createElement(`div`);
     reminderNode.className = `reminder`;
     reminderNode.innerHTML = `<div class="reminder-box">
                 <div class="reminder-header">REMINDER</div>
-                ${html}
+                ${alarmHtml} ${nonAlarmHtml}
                 <button class="reminder-btn">Get it!</button>
             </div>`;
 
