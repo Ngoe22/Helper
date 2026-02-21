@@ -60,11 +60,12 @@ function getDataBase() {
 
 async function start() {
     runLoadingAnimation(true);
-    setInterval(updateClock2, 1000);
+
     renderTimezoneList();
     await getDataBase();
     await updateMainData();
     await renderReminder();
+    setInterval(updateClock2, 1000);
     runLoadingAnimation(false);
 }
 start();

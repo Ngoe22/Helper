@@ -166,8 +166,9 @@ async function updateClock2() {
 }
 
 async function alarm(time) {
+    if (!minorData[0].list) return;
+
     const list = Object.entries(minorData[0].list);
- 
 
     for (let [key, value] of list) {
         if (value.alarm === time) {
