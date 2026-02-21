@@ -480,28 +480,28 @@ input[type="date"] {
     background-size: contain;
 }
 .submit::after {
-    background-image: url(../Assets/Icons/circle-check-regular.svg);
+    background-image: url(../assets/icons/circle-check-regular.svg);
 }
 .close::after {
-    background-image: url(../Assets/Icons/circle-xmark-regular.svg);
+    background-image: url(../assets/icons/circle-xmark-regular.svg);
 }
 .edit::after {
-    background-image: url(../Assets/Icons/ellipsis-solid.svg);
+    background-image: url(../assets/icons/ellipsis-solid.svg);
 }
 .destroy::after {
-    background-image: url(../Assets/Icons/rectangle-xmark-solid.svg);
+    background-image: url(../assets/icons/rectangle-xmark-solid.svg);
 }
 .unpin::after {
-    background-image: url(../Assets/Icons/square-xmark-solid.svg);
+    background-image: url(../assets/icons/square-xmark-solid.svg);
 }
 .add::after {
-    background-image: url(../Assets/Icons/file-circle-plus-solid.svg);
+    background-image: url(../assets/icons/file-circle-plus-solid.svg);
 }
 .add::after {
-    background-image: url(../Assets/Icons/file-circle-plus-solid.svg);
+    background-image: url(../assets/icons/file-circle-plus-solid.svg);
 }
 .hide-section::after {
-    background-image: url(../Assets/Icons/eye-slash-solid.svg);
+    background-image: url(../assets/icons/eye-slash-solid.svg);
 }
 
 /* project-bar */
