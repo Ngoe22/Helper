@@ -1117,11 +1117,12 @@ function removeHtmlRun(node) {
 
     console.log(node.value);
 
-    const processed = removingHtml(node.value);
-    result.innerText = processed;
+    // const processed = removingHtml(node.value);
+
+    result.innerHTML = node.value;
     btn.onclick = (e) => {
-        navigator.clipboard.writeText(processed);
-        mainNotification(`COPIED`,`green`)
+        navigator.clipboard.writeText(result.innerText);
+        mainNotification(`COPIED`, `green`);
     };
 }
 
