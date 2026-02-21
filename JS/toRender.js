@@ -116,10 +116,20 @@ contentBoard.onclick = (e) => {
         };
     } else if (list.contains(`toDo-due-reset`)) {
         resetDueForToDo(contentCard, node.closest(`.toDo-row`));
+    } else if (list.contains(`rmHtml`)) {
+        contentAddRemoveHtml();
     }
 
     //
-    //
+    // contentAddRemoveHtml
+};
+
+contentBoard.onchange = (e) => {
+    const node = e.target;
+    const list = node.classList;
+    if (list.contains(`removeHtml`)) {
+        removeHtmlRun(node);
+    }
 };
 
 // ---------------------------- minor function  ----------------------------
@@ -661,6 +671,7 @@ function renderContent() {
     correspondFunc = {
         QA: renderContentQA,
         toDo: renderContentToDo,
+        removeHtml: renderRemoveHtml,
     };
     for (let [key, value] of source) {
         html += `<div class="content-card" data-content-id = "${value.id}" data-content-type = "${value.type}"  >
@@ -679,7 +690,7 @@ function renderContent() {
     html += `        
     <div class="tools">
         <div class="tool add-a-QA">QA</div>
-        <div class="tool work-flow">WF</div>
+        <div class="tool rmHtml">Remove HTML</div>
         <div class="tool add-a-toDoList">toDo</div>
     </div>`;
     contentBoard.innerHTML = html;
@@ -1067,3 +1078,73 @@ async function deleteReminderContentCard(contentCard) {
 
     return;
 }
+
+//
+
+async function contentAddRemoveHtml() {
+    //
+    runLoadingAnimation(true);
+    //
+    const newId = makeID();
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const clone = structuredClone(getSectionSourceList(projectId));
+    //
+
+    clone[sectionId].contentData[newId] = {
+        name: `new remove Html`,
+        id: newId,
+        type: `removeHtml`,
+        // rows: ``,
+    };
+    await updateData(mainURL, projectId, { pageData: clone });
+    await updateMainData();
+    renderContent();
+    runLoadingAnimation(false);
+}
+
+function renderRemoveHtml() {
+    return (html = `
+        <textarea class="removeHtml"></textarea>
+        <div class="removedHtml"></div>
+        <button class="getRemovedHtml">Copy</button>
+    `);
+}
+
+function removeHtmlRun(node) {
+    const result = node.nextElementSibling;
+    const btn = result.nextElementSibling;
+
+    console.log(node.value);
+
+    const processed = removingHtml(node.value);
+    result.innerText = processed;
+    btn.onclick = (e) => {
+        navigator.clipboard.writeText(processed);
+        mainNotification(`COPIED`,`green`)
+    };
+}
+
+function removingHtml(text) {
+    const array = text.split(``);
+    const newArray = [];
+
+    let switchh = true;
+
+    for (let i in array) {
+        const text = array[i];
+
+        if (text === `<`) {
+            switchh = false;
+        } else if (text === `>`) {
+            switchh = true;
+            continue;
+        }
+
+        if (switchh) newArray.push(text);
+    }
+
+    return newArray.join(``);
+}
+
+// Pamper yourself or someone you love with our selectively curated <b>Aromatherapy Blueberry Milk Body Butter</b>, indulge in an upscale spa
