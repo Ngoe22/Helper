@@ -61,10 +61,10 @@ function getDataBase() {
 async function start() {
     runLoadingAnimation(true);
 
-    renderTimezoneList();
     await getDataBase();
     await updateMainData();
     await renderReminder();
+    renderTimezoneList();
     setInterval(updateClock2, 1000);
     runLoadingAnimation(false);
 }
