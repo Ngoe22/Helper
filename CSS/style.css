@@ -785,6 +785,8 @@ const contentBoard = document.querySelector(`.content-board`);
     line-height: 1.5;
     font-size: 1.3rem;
     word-spacing: 2px;
+    overflow: auto;
+    resize: vertical;
 }
 
 .getRemovedHtml {
