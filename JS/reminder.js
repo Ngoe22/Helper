@@ -14,9 +14,6 @@ async function updateReminder(rowId, obj, add = true) {
 async function renderReminder(alarm = ``) {
     await updateMinorData();
 
-    console.log(minorData[0]);
-    console.log(minorData[0].list);
-
     const list = Object.entries(minorData[0].list);
 
     let html = ``;

@@ -118,6 +118,12 @@ contentBoard.onclick = (e) => {
         resetDueForToDo(contentCard, node.closest(`.toDo-row`));
     } else if (list.contains(`rmHtml`)) {
         contentAddRemoveHtml();
+    } else if (list.contains(`saveImgConvert`)) {
+        saveImgConvert(node);
+    } else if (list.contains(`saveImgCopy`)) {
+        saveImgCopy(node);
+    } else if (list.contains(`add-a-saveImg`)) {
+        contentAddSaveImg();
     }
 
     //
@@ -672,6 +678,7 @@ function renderContent() {
         QA: renderContentQA,
         toDo: renderContentToDo,
         removeHtml: renderRemoveHtml,
+        saveImg: renderSaveImg,
     };
     for (let [key, value] of source) {
         html += `<div class="content-card" data-content-id = "${value.id}" data-content-type = "${value.type}"  >
@@ -692,6 +699,7 @@ function renderContent() {
         <div class="tool add-a-QA">QA</div>
         <div class="tool rmHtml">Remove HTML</div>
         <div class="tool add-a-toDoList">toDo</div>
+        <div class="tool add-a-saveImg">autoSaveImg</div>
     </div>`;
     contentBoard.innerHTML = html;
 }
@@ -1126,26 +1134,106 @@ function removeHtmlRun(node) {
     };
 }
 
-function removingHtml(text) {
-    const array = text.split(``);
-    const newArray = [];
+// function removingHtml(text) {
+//     const array = text.split(``);
+//     const newArray = [];
 
-    let switchh = true;
+//     let switchh = true;
 
-    for (let i in array) {
-        const text = array[i];
+//     for (let i in array) {
+//         const text = array[i];
 
-        if (text === `<`) {
-            switchh = false;
-        } else if (text === `>`) {
-            switchh = true;
-            continue;
-        }
+//         if (text === `<`) {
+//             switchh = false;
+//         } else if (text === `>`) {
+//             switchh = true;
+//             continue;
+//         }
 
-        if (switchh) newArray.push(text);
-    }
+//         if (switchh) newArray.push(text);
+//     }
 
-    return newArray.join(``);
+//     return newArray.join(``);
+// }
+
+// ==========================
+
+async function contentAddSaveImg() {
+    //
+    runLoadingAnimation(true);
+    //
+    const newId = makeID();
+    const projectId = getActiveProject(`id`);
+    const sectionId = getActiveSection(`id`);
+    const clone = structuredClone(getSectionSourceList(projectId));
+    //
+
+    clone[sectionId].contentData[newId] = {
+        name: `new Auto saveImage`,
+        id: newId,
+        type: `saveImg`,
+        // rows: ``,
+    };
+    await updateData(mainURL, projectId, { pageData: clone });
+    await updateMainData();
+    renderContent();
+    runLoadingAnimation(false);
 }
 
-// Pamper yourself or someone you love with our selectively curated <b>Aromatherapy Blueberry Milk Body Butter</b>, indulge in an upscale spa
+function renderSaveImg() {
+    return (html = `
+        <ul class="saveImgProcess">
+            <li>Open your working file on PC</li>
+            <li>Right click (mouse)</li>
+            <li>Open Terminal</li>
+            <li>Paste converted text into the Terminal</li>
+        </ul>
+        <textarea class="saveImgEnter"></textarea>
+        <button class="saveImgConvert">Convert</button>
+        <div class="saveImgCode"></div>
+        <button class="saveImgCopy">Copy</button>
+    `);
+}
+
+function saveImgConvert(node) {
+    const enterBlock = node.previousElementSibling;
+    const showBlock = node.nextElementSibling;
+
+    // main
+
+    const initText = enterBlock.value.trim();
+    if (!initText) {
+        showBlock.textContent = `Enter some data`;
+        return;
+    }
+    const excels = initText.split(`\n`);
+
+    let UPCsInnerText = ``;
+    let URLsInnerText = ``;
+
+    let l = excels.length;
+    for (let i = 0; i < l; i++) {
+        const temp = excels[i].split(`\t`);
+        if (!temp[0]) break;
+
+        let tempText = ``;
+        for (let j = 8; j < 14; j++) {
+            if (temp[j] !== ``)
+                tempText += `${j === 8 ? `` : `,`}"${temp[j].trim()}"`;
+        }
+
+        UPCsInnerText += `${i === 0 ? `` : `,`}"${temp[1]}"`;
+        URLsInnerText += `${i === 0 ? `` : `,`}@(${tempText} )`;
+    }
+
+    URLsInnerText = `$URLs = @(${URLsInnerText}) ;`;
+    UPCsInnerText = `$UPCs = @(${UPCsInnerText}) ;`;
+
+    showBlock.textContent = `${URLsInnerText} ${UPCsInnerText} $client = [System.Net.Http.HttpClient]::new() ;$path = $PWD.Path;Write-Host "Downloading , Pls wait a moment ... <3" ;for ($i = 0; $i -lt $URLs.Length; $i++) { for ($j = 0; $j -lt $URLs[$i].Length; $j++) { $cleanUrl = $URLs[$i][$j].Trim(); $prefix = $UPCs[$i]; if ($j -eq 0) { $name = "$prefix-hero"; } else { $name = "$prefix-$j"; } $file = "$path/$name.jpg"; if (Test-Path $file) { Write-Host "Skip $name" ; continue ; } try { $bytes = $client.GetByteArrayAsync($cleanUrl).Result ; [System.IO.File]::WriteAllBytes($file, $bytes) ; } catch { Write-Host "Error: $cleanUrl" ; } }}Write-Host "ALL DONE!";`;
+}
+
+function saveImgCopy(node) {
+    const showBlock = node.previousElementSibling;
+    navigator.clipboard.writeText(showBlock.innerText);
+    mainNotification(`COPIED`, `green`);
+}

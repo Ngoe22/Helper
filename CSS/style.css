@@ -803,3 +803,51 @@ const contentBoard = document.querySelector(`.content-board`);
     font-size: 1.8rem;
     margin-left: auto;
 }
+
+/* saveImgProcess */
+
+.saveImgProcess {
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+    color: rgba(0, 0, 0, 0.8);
+    font-weight: 600;
+    margin-left: 20px;
+}
+
+.saveImgProcess li {
+    margin-bottom: 7px;
+}
+
+.saveImgEnter {
+    padding: 5px;
+}
+
+.saveImgConvert,
+.saveImgCopy {
+    width: 100%;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    display: block;
+    margin: 5px 0;
+    padding: 5px;
+    border: none;
+    border-radius: 3px;
+    background: rgb(193, 193, 193);
+    transition: 0.3s;
+}
+.saveImgConvert:hover,
+.saveImgCopy:hover {
+    background: rgb(129, 177, 119);
+}
+
+.saveImgCode {
+    padding: 5px;
+    min-height: 100px;
+    border: 1px solid gray;
+}
+
+.saveImgCopy {
+    margin: 20px 0 0;
+}
