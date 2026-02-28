@@ -1208,28 +1208,65 @@ function saveImgConvert(node) {
     }
     const excels = initText.split(`\n`);
 
-    let UPCsInnerText = ``;
-    let URLsInnerText = ``;
+    let data = ``;
 
     let l = excels.length;
     for (let i = 0; i < l; i++) {
-        const temp = excels[i].split(`\t`);
-        if (!temp[0]) break;
+        const excelRow = excels[i].split(`\t`);
+        if (!excelRow[0] & (excelRow.length === 1)) break;
 
-        let tempText = ``;
-        for (let j = 8; j < 14; j++) {
-            if (temp[j] !== ``)
-                tempText += `${j === 8 ? `` : `,`}"${temp[j].trim()}"`;
-        }
+        let getUrlsFromE = [];
+        excelRow.forEach((cell) => {
+            if (/https:\/\/.*\.(jpg|png|webp)/i.test(cell)) {
+                getUrlsFromE.push(`"${cell}"`);
+            }
+        });
 
-        UPCsInnerText += `${i === 0 ? `` : `,`}"${temp[1]}"`;
-        URLsInnerText += `${i === 0 ? `` : `,`}@(${tempText} )`;
+        console.log(excelRow);
+         console.log(excelRow[1]);
+
+        data += ` [PSCustomObject]@{
+            UPC  = ${excelRow[1]} ;
+            URLs = @(${getUrlsFromE.join(`,`)})
+         }`;
     }
 
-    URLsInnerText = `$URLs = @(${URLsInnerText}) ;`;
-    UPCsInnerText = `$UPCs = @(${UPCsInnerText}) ;`;
+    data = ` $Data = @( ${data} )  ;`;
+    console.log(data);
 
-    showBlock.textContent = `${URLsInnerText} ${UPCsInnerText} $client = [System.Net.Http.HttpClient]::new() ;$path = $PWD.Path;Write-Host "Downloading , Pls wait a moment ... <3" ;for ($i = 0; $i -lt $URLs.Length; $i++) { for ($j = 0; $j -lt $URLs[$i].Length; $j++) { $cleanUrl = $URLs[$i][$j].Trim(); $prefix = $UPCs[$i]; if ($j -eq 0) { $name = "$prefix-hero"; } else { $name = "$prefix-$j"; } $file = "$path/$name.jpg"; if (Test-Path $file) { Write-Host "Skip $name" ; continue ; } try { $bytes = $client.GetByteArrayAsync($cleanUrl).Result ; [System.IO.File]::WriteAllBytes($file, $bytes) ; } catch { Write-Host "Error: $cleanUrl" ; } }}Write-Host "ALL DONE!";`;
+    // showBlock.textContent = `${URLsInnerText} ${UPCsInnerText} $client = [System.Net.Http.HttpClient]::new() ;$path = $PWD.Path;Write-Host "Downloading , Pls wait a moment ... <3" ;for ($i = 0; $i -lt $URLs.Length; $i++) { for ($j = 0; $j -lt $URLs[$i].Length; $j++) { $cleanUrl = $URLs[$i][$j].Trim(); $prefix = $UPCs[$i]; if ($j -eq 0) { $name = "$prefix-hero"; } else { $name = "$prefix-$j"; } $file = "$path/$name.jpg"; if (Test-Path $file) { Write-Host "Skip $name" ; continue ; } try { $bytes = $client.GetByteArrayAsync($cleanUrl).Result ; [System.IO.File]::WriteAllBytes($file, $bytes) ; } catch { Write-Host "Error: $cleanUrl" ; } }}Write-Host "ALL DONE!";`;
+
+    showBlock.textContent = `${data}
+                $client = [System.Net.Http.HttpClient]::new() ;
+                $path = $PWD.Path;
+                Write-Host "Downloading , Pls wait a moment ... <3" ;
+                foreach ( $item in $Data  ) {
+                    $index = 0 ;
+                    foreach ( $url in $item.URLs ) {
+                        Write-Host $url ;
+
+                        $prefix = $item.UPC  ;
+                        if ($index -eq 0) {
+                            $name = "$prefix-hero";
+                        } else {
+                            $name = "$prefix-$index";
+                        }
+
+                        $cleanUrl = $url.Trim();
+                        $file = "$path/$name.jpg";
+
+                        try {
+                            $bytes = $client.GetByteArrayAsync($cleanUrl).Result ;
+                            [System.IO.File]::WriteAllBytes($file, $bytes) ;
+                        }
+                        catch {
+                            Write-Host "Error: $cleanUrl" ;
+                        }
+                        $index++ ;
+                    }
+                }
+                Write-Host "ALL DONE!";
+`;
 }
 
 function saveImgCopy(node) {

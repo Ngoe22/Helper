@@ -1,10 +1,16 @@
 // const mainURL = `https://6963c4b02d146d9f58d45a80.mockapi.io/test/data`;
 // const minorURL = `https://6963c4b02d146d9f58d45a80.mockapi.io/test/minor`;
 
+const accounts = {
+    magne: {
+        password: `123`,
+        major: `https://6963c4b02d146d9f58d45a80.mockapi.io/test/data`,
+        minor: `https://6963c4b02d146d9f58d45a80.mockapi.io/test/minor`,
+    },
+};
+
 let mainURL = ``;
 let minorURL = ``;
-
-
 
 async function getData(URL, id) {
     const thisUrl = id ? `${API_URL}/${id}` : URL;
