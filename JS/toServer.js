@@ -7,6 +7,11 @@ const accounts = {
         major: `https://6963c4b02d146d9f58d45a80.mockapi.io/test/data`,
         minor: `https://6963c4b02d146d9f58d45a80.mockapi.io/test/minor`,
     },
+    ilovemagnus: {
+        password: `metoo`,
+        major: `https://699a020f377ac05ce28d0c9d.mockapi.io/work`,
+        minor: `https://699a020f377ac05ce28d0c9d.mockapi.io/minor`,
+    },
 };
 
 let mainURL = ``;
