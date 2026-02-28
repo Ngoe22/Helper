@@ -1218,7 +1218,7 @@ function saveImgConvert(node) {
         let getUrlsFromE = [];
 
         excelRow.forEach((cell) => {
-            if (/^https:\/\/.*\?dl=/i.test(cell)) {
+            if (/^https:\/\/.*dl=/i.test(cell)) {
                 const newUrl = cell.replace("dl=0", "dl=1");
                 getUrlsFromE.push(`"${newUrl}"`);
                 console.log(`pass`);
