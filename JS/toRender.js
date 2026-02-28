@@ -1223,12 +1223,12 @@ function saveImgConvert(node) {
         });
 
         console.log(excelRow);
-         console.log(excelRow[1]);
+        console.log(excelRow[1]);
 
-        data += ` [PSCustomObject]@{
+        data += `${i === 0 ? "" : ","} [PSCustomObject]@{
             UPC  = ${excelRow[1]} ;
             URLs = @(${getUrlsFromE.join(`,`)})
-         }`;
+         } `;
     }
 
     data = ` $Data = @( ${data} )  ;`;
