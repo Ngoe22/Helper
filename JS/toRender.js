@@ -124,6 +124,9 @@ contentBoard.onclick = (e) => {
         saveImgCopy(node);
     } else if (list.contains(`add-a-saveImg`)) {
         contentAddSaveImg();
+    } else if (list.contains(`click-to-copy`)) {
+        navigator.clipboard.writeText(node.textContent);
+        mainNotification(`COPIED`, `green`);
     }
 
     //
@@ -1183,10 +1186,15 @@ async function contentAddSaveImg() {
 function renderSaveImg() {
     return (html = `
         <ul class="saveImgProcess">
-            <li>Open your working file on PC</li>
-            <li>Right click (mouse)</li>
-            <li>Open Terminal</li>
-            <li>Paste converted text into the Terminal</li>
+            <li>1. Open your working file on PC</li>
+            <li>2. Right click (mouse)</li>
+            <li>3. Open Terminal</li>
+            <li>4. Paste converted text into the Terminal</li>
+            <li>
+                Remember : Add this 
+                <span data-click="to-copy" class="click-to-copy">1e0fLiN3tMntLt</span> 
+                right after last column of excel before copy
+            </li> 
         </ul>
         <textarea class="saveImgEnter"></textarea>
         <button class="saveImgConvert">Convert</button>
@@ -1206,7 +1214,7 @@ function saveImgConvert(node) {
         showBlock.textContent = `Enter some data`;
         return;
     }
-    const excels = initText.split(`\n`);
+    const excels = initText.split(`\t1e0fLiN3tMntLt\n`);
 
     let data = ``;
 
@@ -1221,7 +1229,6 @@ function saveImgConvert(node) {
             if (/^https:\/\/.*dl=/i.test(cell)) {
                 const newUrl = cell.replace("dl=0", "dl=1");
                 getUrlsFromE.push(`"${newUrl}"`);
-                console.log(`pass`);
             }
         });
 
