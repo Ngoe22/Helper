@@ -118,10 +118,12 @@ contentBoard.onclick = (e) => {
         resetDueForToDo(contentCard, node.closest(`.toDo-row`));
     } else if (list.contains(`rmHtml`)) {
         contentAddRemoveHtml();
-    } else if (list.contains(`saveImgConvert`)) {
-        saveImgConvert(node);
     } else if (list.contains(`saveImgCopy`)) {
         saveImgCopy(node);
+        // deleteImgCopy
+    } else if (list.contains(`clearImgCopy`)) {
+        clearImgCopy(node);
+        saveImgConvert(node.nextElementSibling);
     } else if (list.contains(`add-a-saveImg`)) {
         contentAddSaveImg();
     } else if (list.contains(`click-to-copy`)) {
@@ -138,6 +140,8 @@ contentBoard.onchange = (e) => {
     const list = node.classList;
     if (list.contains(`removeHtml`)) {
         removeHtmlRun(node);
+    } else if (list.contains(`saveImgEnter`)) {
+        saveImgConvert(node);
     }
 };
 
@@ -1196,20 +1200,24 @@ function renderSaveImg() {
                 right after last column of excel before copy
             </li> 
         </ul>
+        <button class="clearImgCopy">Clear</button>
         <textarea class="saveImgEnter"></textarea>
-        <button class="saveImgConvert">Convert</button>
+        
         <div class="saveImgCode"></div>
         <button class="saveImgCopy">Copy</button>
     `);
+    //<button class="saveImgConvert">Convert</button>
 }
 
 function saveImgConvert(node) {
-    const enterBlock = node.previousElementSibling;
+    // const enterBlock = node.previousElementSibling;
     const showBlock = node.nextElementSibling;
 
-    // main
+    console.log(`meow`);
 
-    const initText = enterBlock.value.trim();
+    // main
+    //.trim()
+    const initText = node.value;
     if (!initText) {
         showBlock.textContent = `Enter some data`;
         return;
@@ -1235,6 +1243,8 @@ function saveImgConvert(node) {
                 getUrlsFromE.push(`"${newUrl}"`);
             }
         });
+
+        console.log(excelRow);
 
         data += `${i === 0 ? "" : ","} [PSCustomObject]@{
             UPC  = ${excelRow[1]} ;
@@ -1280,4 +1290,9 @@ function saveImgCopy(node) {
     const showBlock = node.previousElementSibling;
     navigator.clipboard.writeText(showBlock.innerText);
     mainNotification(`COPIED`, `green`);
+}
+
+function clearImgCopy(node) {
+    const enterBlock = node.nextElementSibling;
+    enterBlock.value = ``;
 }

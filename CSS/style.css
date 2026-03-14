@@ -839,7 +839,7 @@ const contentBoard = document.querySelector(`.content-board`);
 }
 .saveImgConvert:hover,
 .saveImgCopy:hover {
-    background:  rgb(129, 201, 129);
+    background: rgb(129, 201, 129);
 }
 
 .saveImgCode {
@@ -850,6 +850,20 @@ const contentBoard = document.querySelector(`.content-board`);
 
 .saveImgCopy {
     margin: 20px 0 0;
+}
+
+.clearImgCopy {
+    cursor: pointer;
+    font-size: 1.8rem;
+    margin-left: auto;
+    display: block;
+    margin-bottom: 2px;
+    padding: 3px 30px;
+    background: rgb(251, 53, 53);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    opacity: .7;
 }
 
 /*  */
