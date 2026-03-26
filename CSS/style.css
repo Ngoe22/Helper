@@ -627,6 +627,7 @@ input[type="date"] {
 .content-board {
     flex-grow: 1;
     padding: 5px;
+    overflow: hidden;
 }
 
 .content-card {
@@ -635,6 +636,7 @@ input[type="date"] {
     border: 1px solid gainsboro;
     margin-bottom: 20px;
     transition: 0.5s;
+    overflow: hidden;
 }
 .content-card:hover {
     box-shadow: -1px 1px 2px 1px rgba(0, 0, 0, 0.2);
@@ -820,6 +822,8 @@ const contentBoard = document.querySelector(`.content-board`);
 
 .saveImgEnter {
     padding: 5px;
+    overflow: hidden;
+    width: 100%;
 }
 
 .saveImgConvert,
@@ -846,6 +850,8 @@ const contentBoard = document.querySelector(`.content-board`);
     padding: 5px;
     min-height: 100px;
     border: 1px solid gray;
+    overflow: hidden;
+    width: 100%;
 }
 
 .saveImgCopy {

@@ -1200,6 +1200,7 @@ function renderSaveImg() {
                 right after last column of excel before copy
             </li> 
         </ul>
+        <input type="text" >
         <button class="clearImgCopy">Clear</button>
         <textarea class="saveImgEnter"></textarea>
         
@@ -1212,8 +1213,12 @@ function renderSaveImg() {
 function saveImgConvert(node) {
     // const enterBlock = node.previousElementSibling;
     const showBlock = node.nextElementSibling;
+    const referBlock = node.previousElementSibling.previousElementSibling;
 
-    console.log(`meow`);
+    console.log(
+        referBlock.value,
+        referBlock.value ? `"Referer" = "${referBlock.value}";` : "",
+    );
 
     // main
     //.trim()
@@ -1254,35 +1259,49 @@ function saveImgConvert(node) {
     data = ` $Data = @( ${data} )  ;`;
 
     showBlock.textContent = `${data}
-                $client = [System.Net.Http.HttpClient]::new() ;
-                $path = $PWD.Path;
-                Write-Host "Downloading , Pls wait a moment ... <3" ;
-                foreach ( $item in $Data  ) {
-                    $index = 0 ;
-                    foreach ( $url in $item.URLs ) {
-                        Write-Host $url ;
+        $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession;
 
-                        $prefix = $item.UPC  ;
-                        if ($index -eq 0) {
-                            $name = "$prefix-hero";
-                        } else {
-                            $name = "$prefix-$index";
-                        }
+        $headers = @{
+            "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
+            "Accept"     = "image/avif,image/webp,image/apng,image/*,*/*;q=0.8";
+            ${referBlock.value ? `"Referer" = "${referBlock.value}";` : ""}
+        };
 
-                        $cleanUrl = $url.Trim();
-                        $file = "$path/$name.jpg";
+        $path = $PWD.Path;
+        Write-Host "Downloading , Pls wait a moment ... <3";
 
-                        try {
-                            $bytes = $client.GetByteArrayAsync($cleanUrl).Result ;
-                            [System.IO.File]::WriteAllBytes($file, $bytes) ;
-                        }
-                        catch {
-                            Write-Host "Error: $cleanUrl" ;
-                        }
-                        $index++ ;
-                    }
+        foreach ($item in $Data) {
+            $index = 0;
+
+            foreach ($url in $item.URLs) {
+                Write-Host $url;
+
+                $prefix = $item.UPC;
+
+                if ($index -eq 0) {
+                    $name = "$prefix-hero";
                 }
-                Write-Host "ALL DONE!";
+                else {
+                    $name = "$prefix-$index";
+                };
+
+                $cleanUrl = $url.Trim();
+                $file = "$path/$name.jpg";
+
+                try {
+                    Invoke-WebRequest -Uri $cleanUrl -Headers $headers -WebSession $session -OutFile $file;
+                    Write-Host "OK: $name";
+                }
+                catch {
+                    Write-Host "FAIL: $cleanUrl";
+                    Write-Host $_.Exception.Message;
+                };
+
+                $index++;
+            };
+        };
+
+        Write-Host "ALL DONE!";
 `;
 }
 
@@ -1293,6 +1312,14 @@ function saveImgCopy(node) {
 }
 
 function clearImgCopy(node) {
+    const referBlock = node.previousElementSibling;
     const enterBlock = node.nextElementSibling;
+
+    // referBlock.value = ``;
     enterBlock.value = ``;
 }
+
+`
+$Data = @( [PSCustomObject]@{ UPC = 850023300836 ; URLs = @("https://www.londontownusa.com/cdn/shop/files/Strengthening_Nail_Cream_-_With_Shadow_540x.jpg?v=1762277401","https://www.londontownusa.com/cdn/shop/files/Thumbnail_2a_540x.jpg?v=1744047517","https://www.londontownusa.com/cdn/shop/files/thumbnail_3_2_540x.jpg?v=1744047517") } , [PSCustomObject]@{ UPC = 850070261005 ; URLs = @("https://www.londontownusa.com/cdn/shop/files/Petal_Pink_GB_540x.jpg?v=1762277234","https://www.londontownusa.com/cdn/shop/files/Thumbnail2_corrected_540x.jpg?v=1741102124","https://www.londontownusa.com/cdn/shop/files/Thumbnail3_864c5266-567d-4005-8dab-4f876cc05f06_540x.jpg?v=1741102124","https://www.londontownusa.com/cdn/shop/files/thumbnail4-edited_540x.jpg?v=1741102124","https://www.londontownusa.com/cdn/shop/files/preview_images/0585e1c194f445ff8331272151eed0b7.thumbnail.0000000000_540x.jpg?v=1741099534") } ) ; $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession; $headers = @{ "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"; "Accept" = "image/avif,image/webp,image/apng,image/*,*/*;q=0.8"; }; $path = $PWD.Path; Write-Host "Downloading , Pls wait a moment ... <3"; foreach ($item in $Data) { $index = 0; foreach ($url in $item.URLs) { Write-Host $url; $prefix = $item.UPC; if ($index -eq 0) { $name = "$prefix-hero"; } else { $name = "$prefix-$index"; }; $cleanUrl = $url.Trim(); $file = "$path/$name.jpg"; try { Invoke-WebRequest -Uri $cleanUrl -Headers $headers -WebSession $session -OutFile $file; Write-Host "OK: $name"; } catch { Write-Host "FAIL: $cleanUrl"; Write-Host $_.Exception.Message; }; $index++; }; }; Write-Host "ALL DONE!";
+
+`;
