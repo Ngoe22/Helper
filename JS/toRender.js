@@ -1262,10 +1262,16 @@ function saveImgConvert(node) {
         $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession;
 
         $headers = @{
-            "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
-            "Accept"     = "image/avif,image/webp,image/apng,image/*,*/*;q=0.8";
-            ${referBlock.value ? `"Referer" = "${referBlock.value}";` : ""}
+        "User-Agent"      = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
+        "Accept"          = "image/webp,image/apng,image/*,*/*;q=0.8";
+        "Accept-Language" = "en-US,en;q=0.9";
+        ${referBlock.value ? `"Referer" = "${referBlock.value}";` : ""}
+        "Sec-Fetch-Site"  = "same-origin";
+        "Sec-Fetch-Mode"  = "no-cors";
+        "Sec-Fetch-Dest"  = "image";
         };
+            
+       
 
         $path = $PWD.Path;
         Write-Host "Downloading , Pls wait a moment ... <3";
@@ -1286,7 +1292,8 @@ function saveImgConvert(node) {
                 };
 
                 $cleanUrl = $url.Trim();
-                $file = "$path/$name.jpg";
+                $ext = [System.IO.Path]::GetExtension($cleanUrl).Split("?")[0];
+                $file = "$path/$name$ext";
 
                 try {
                     Invoke-WebRequest -Uri $cleanUrl -Headers $headers -WebSession $session -OutFile $file;
